@@ -6,7 +6,7 @@
     "moduleResolution": "node16",
     "esModuleInterop": true,
     "target": "es2022",
-    "outDir": "lib",
+    "outDir": "dist",
     "rootDir": "src",
     "strict": true,
     "strictNullChecks": true,
@@ -16,8 +16,8 @@
     }
   },
   "ts-node": {
-    "esm": true
+    "esm": true,
+    "swc": true
   },
-  "include": ["src/**/*", "src/index.d.ts"],
-  "exclude": ["node_modules"]
+  "include": ["./src/**/*", "src/index.d.ts"]
 }
