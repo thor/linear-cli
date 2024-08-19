@@ -9,6 +9,7 @@ import { teamWorkflowStates } from './teamWorkflowStates';
 import { issuesWithStatus } from './issuesWithStatus';
 import { assignedIssues } from './assignedIssues';
 import { searchIssues } from './searchIssues';
+import { teamLabels } from './teamLabels';
 
 type UserInfo = {
   apiKey: string;
@@ -38,6 +39,7 @@ export class Linear extends LinearClient {
       issuesWithStatus: issuesWithStatus(this.client),
       searchIssues: searchIssues(this.client),
       teamWorkflowStates: teamWorkflowStates(this.client),
+      teamLabels: teamLabels(this),
     };
   }
 }
