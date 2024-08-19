@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { Config as IConfig } from '@oclif/core';
-import { CacheSchema, CacheData } from './cacheSchema';
-import { Config } from './configSchema';
-import { Linear } from './linear/Linear';
+import { CacheSchema, CacheData } from './cacheSchema.js';
+import { Config } from './configSchema.js';
+import { Linear } from './linear/Linear.js';
 
 type Params = {
   config: IConfig;

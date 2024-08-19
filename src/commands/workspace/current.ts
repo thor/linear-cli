@@ -1,4 +1,4 @@
-import Command from '../../base';
+import Command from '../../base.js';
 
 export default class WorkspaceCurrent extends Command {
   static description = 'Print current workspace';

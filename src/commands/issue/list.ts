@@ -1,11 +1,23 @@
-import { OutputFlags } from '@oclif/parser/lib';
 import chalk from 'chalk';
-import { cli } from 'cli-ux';
-import Command, { Flags } from '../../base';
-import { render } from '../../components';
+import Command, { Flags } from '../../base.js';
+import { render } from '../../components/index.js';
+
+// TODO: These are taken from the older version of cli-ux for the table rendering and should be replaced
+const sharedTableFlags = {
+  filter: Flags.string({ description: 'filter property by partial string matching, ex: name=foo' }),
+  csv: Flags.boolean({ exclusive: ['no-truncate'], description: 'output is csv format [alias: --output=csv]' }),
+  output: Flags.string({
+    exclusive: ['no-truncate', 'csv'],
+    description: 'output in a more machine friendly format',
+    options: ['csv', 'json', 'yaml'],
+  }),
+  extended: Flags.boolean({ exclusive: ['columns'], char: 'x', description: 'show extra columns' }),
+  'no-truncate': Flags.boolean({ exclusive: ['csv'], description: 'do not truncate output to fit screen' }),
+  'no-header': Flags.boolean({ exclusive: ['csv'], description: 'hide table header from output' }),
+}
 
 export const tableFlags = {
-  ...cli.table.flags(),
+  ...sharedTableFlags,
   sort: Flags.string({
     description: "property to sort by (prepend '-' for descending)",
     default: '-status',
@@ -21,7 +33,7 @@ export default class IssueList extends Command {
 
   static aliases = ['list', 'ls', 'l'];
 
-  static flags = {
+  static override flags = {
     ...tableFlags,
     mine: Flags.boolean({ char: 'm', description: 'Only show issues assigned to me' }),
     team: Flags.string({

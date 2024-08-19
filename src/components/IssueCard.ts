@@ -1,13 +1,13 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
 import wrapAnsi from 'wrap-ansi';
-import { Status } from './Status';
-import { Priority } from './Priority';
-import { Label } from './Label';
+import { Status } from './Status.js';
+import { Priority } from './Priority.js';
+import { Label } from './Label.js';
 
-import type { GetIssueQuery } from '../generated/_documents';
+import type { GetIssueQuery } from '../generated/_documents.js';
 
 dayjs.extend(relativeTime);
 

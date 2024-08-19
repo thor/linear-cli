@@ -1,4 +1,4 @@
-import Command, { Flags } from '../../base';
+import Command, { Flags } from '../../base.js';
 
 export default class CacheShow extends Command {
   static description = 'Print the cache file';

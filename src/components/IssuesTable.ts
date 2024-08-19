@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 import { cli } from 'cli-ux';
 import sw from 'string-width';
-import { IssueFragment } from '../generated/_documents';
-import { Status } from './Status';
-import { Label } from './Label';
-import { Priority } from './Priority';
+import { IssueFragment } from '../generated/_documents.js';
+import { Status } from './Status.js';
+import { Label } from './Label.js';
+import { Priority } from './Priority.js';
 
 type Options = {
   flags: any;

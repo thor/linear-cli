@@ -1,10 +1,14 @@
+/// <reference path="../../index.d.ts"/>
+//
 import { cli } from 'cli-ux';
-import Command from '../../base';
+import Command from '../../base.js';
 import inquirer from 'inquirer';
-import { render } from '../../components';
-import { IssueSearchQuery } from '../../generated/_documents';
+import { render } from '../../components/index.js';
+import { IssueSearchQuery } from '../../generated/_documents.js';
+import { Args } from '@oclif/core';
+import autocomplete from 'inquirer-autocomplete-prompt';
 
-inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
+inquirer.registerPrompt('autocomplete', autocomplete);
 
 type SearchedIssue = IssueSearchQuery['issueSearch']['nodes'][0];
 
@@ -16,7 +20,9 @@ export default class IssueSearch extends Command {
 
   static description = 'describe the command here';
 
-  static args = [{ name: 'query' }];
+  static args = {
+    query: Args.string({required: true})
+  };
 
   async promptSearch() {
     const response = await inquirer.prompt<{
@@ -75,7 +81,7 @@ export default class IssueSearch extends Command {
   }
 
   async run() {
-    const { args } = await this.parse<{}, { query: string }>(IssueSearch);
+    const { args } = await this.parse(IssueSearch);
 
     if (args.query) {
       await this.searchWithQuery(args.query);

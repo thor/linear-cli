@@ -1,15 +1,13 @@
 import { Flags } from '@oclif/core';
 import chalk from 'chalk';
-import * as inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import ora from 'ora';
-import Command from '../../base';
-import { render } from '../../components';
-import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId';
+import Command from '../../base.js';
+import { render } from '../../components/index.js';
+import { issueArgs, getIssueId } from '../../utils/issueId.js';
 
 const properties = ['title', 'description', 'status'] as const;
 type Property = typeof properties[number];
-
-type Args = { issueId: string } & { propertyToModify: Property };
 
 export default class IssueUpdate extends Command {
   static description = 'Update an issue';
@@ -24,7 +22,7 @@ export default class IssueUpdate extends Command {
     }),
   };
 
-  static args = issueArgs;
+  static override args = issueArgs;
 
   runUpdateMethod(issueId: string, property: Property) {
     function throwBadProperty(property: never): never {

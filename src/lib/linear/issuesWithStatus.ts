@@ -1,8 +1,8 @@
 import { LinearGraphQLClient } from '@linear/sdk';
 import ora from 'ora';
-import { handleError } from '../handleError';
-import { StatusIssuesQuery, StatusIssuesQueryVariables } from 'generated/_documents';
-import { IssueConnectionFragment } from './issueFragment';
+import { handleError } from '../handleError.js';
+import { StatusIssuesQuery, StatusIssuesQueryVariables } from 'generated/_documents.js';
+import { IssueConnectionFragment } from './issueFragment.js';
 
 const gql = String.raw;
 

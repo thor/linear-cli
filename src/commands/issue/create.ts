@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import clipboardy from 'clipboardy';
-import Command, { Flags } from '../../base';
+import Command, { Flags } from '../../base.js';
 import chalk from 'chalk';
 import ora from 'ora';
 

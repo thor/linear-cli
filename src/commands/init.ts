@@ -4,10 +4,10 @@ import { LinearClient } from '@linear/sdk';
 import boxen from 'boxen';
 import ora from 'ora';
 import chalk from 'chalk';
-import * as inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import { Command } from '@oclif/core';
-import { Config, User } from '../lib/configSchema';
-import CacheRefresh from './cache/refresh';
+import { Config, User } from '../lib/configSchema.js';
+import CacheRefresh from './cache/refresh.js';
 
 type PromptResponse = {
   apiKey: string;

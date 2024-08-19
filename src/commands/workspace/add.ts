@@ -1,9 +1,9 @@
 import { LinearClient } from '@linear/sdk';
 import chalk from 'chalk';
 import fs from 'fs';
-import * as inquirer from 'inquirer';
-import Command from '../../base';
-import { Workspace, Config } from '../../lib/configSchema';
+import inquirer from 'inquirer';
+import Command from '../../base.js';
+import { Workspace, Config } from '../../lib/configSchema.js';
 
 type PromptResponse = {
   apiKey: string;

@@ -1,9 +1,9 @@
 import clipboardy from 'clipboardy';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import Command, { Flags } from '../../base';
-import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId';
-import { render } from '../../components';
+import Command, { Flags } from '../../base.js';
+import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId.js';
+import { render } from '../../components/index.js';
 
 export default class IssueStart extends Command {
   static description = 'Change status of issue to "In progress" and assign to yourself.';

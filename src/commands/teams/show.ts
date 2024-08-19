@@ -1,7 +1,7 @@
 import { cli } from 'cli-ux';
 import ora from 'ora';
 import { TeamConnection } from '@linear/sdk';
-import Command, { Flags } from '../../base';
+import Command, { Flags } from '../../base.js';
 
 type Team = {
   key?: string;

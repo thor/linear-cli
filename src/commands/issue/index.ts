@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
 import boxen, { Options } from 'boxen';
 import { cli } from 'cli-ux';
 import chalk from 'chalk';
-import Command, { Flags } from '../../base';
-import { GetIssueQuery } from '../../generated/_documents';
-import { render } from '../../components';
-import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId';
+import Command, { Flags } from '../../base.js';
+import { GetIssueQuery } from '../../generated/_documents.js';
+import { render } from '../../components/index.js';
+import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId.js';
 
 dayjs.extend(relativeTime);
 

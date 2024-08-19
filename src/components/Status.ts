@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { WorkflowState } from '../generated/_documents';
+import { WorkflowState } from '../generated/_documents.js';
 
 type Status = Pick<WorkflowState, 'name' | 'color' | 'type'>;
 

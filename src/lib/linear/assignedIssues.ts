@@ -3,10 +3,10 @@ import ora from 'ora';
 import {
   User_AssignedIssuesQuery,
   User_AssignedIssuesQueryVariables,
-} from 'generated/_documents';
+} from 'generated/_documents.js';
 
-import { IssueConnectionFragment } from './issueFragment';
-import { handleError } from '../handleError';
+import { IssueConnectionFragment } from './issueFragment.js';
+import { handleError } from '../handleError.js';
 
 const gql = String.raw;
 

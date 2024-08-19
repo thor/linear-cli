@@ -1,15 +1,15 @@
 import { LinearClient } from '@linear/sdk';
-import { User } from '../configSchema';
-import { issuesAllTeams } from './issuesAllTeams';
-import { issuesFromTeams } from './issuesFromTeam';
-import { issue } from './issue';
-import { allTeams } from './allTeams';
-import { issueWorkflowStates } from './issueWorkflowStates';
-import { teamWorkflowStates } from './teamWorkflowStates';
-import { issuesWithStatus } from './issuesWithStatus';
-import { assignedIssues } from './assignedIssues';
-import { searchIssues } from './searchIssues';
-import { teamLabels } from './teamLabels';
+import { User } from '../configSchema.js';
+import { issuesAllTeams } from './issuesAllTeams.js';
+import { issuesFromTeams } from './issuesFromTeam.js';
+import { issue } from './issue.js';
+import { allTeams } from './allTeams.js';
+import { issueWorkflowStates } from './issueWorkflowStates.js';
+import { teamWorkflowStates } from './teamWorkflowStates.js';
+import { issuesWithStatus } from './issuesWithStatus.js';
+import { assignedIssues } from './assignedIssues.js';
+import { searchIssues } from './searchIssues.js';
+import { teamLabels } from './teamLabels.js';
 
 type UserInfo = {
   apiKey: string;

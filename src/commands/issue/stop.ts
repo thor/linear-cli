@@ -1,11 +1,11 @@
-import * as inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import ora from 'ora';
 import { Flags } from '@oclif/core';
-import { IssueUpdateInput } from '../../generated/_documents';
+import { IssueUpdateInput } from '../../generated/_documents.js';
 import chalk from 'chalk';
-import Command from '../../base';
-import { render } from '../../components';
-import { issueArgs, getIssueId, IssueArgs } from '../../utils/issueId';
+import Command from '../../base.js';
+import { render } from '../../components/index.js';
+import { issueArgs, getIssueId } from '../../utils/issueId.js';
 
 export default class IssueStop extends Command {
   static description = 'Return issue to preview state';

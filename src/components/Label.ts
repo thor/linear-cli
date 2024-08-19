@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { IssueLabel } from '../generated/_documents';
+import { IssueLabel } from '../generated/_documents.js';
 
 type Label = Pick<IssueLabel, 'name' | 'color'>;
 

@@ -3,8 +3,8 @@ import ora from 'ora';
 import {
   GetIssueWorkflowStatesQuery,
   GetIssueWorkflowStatesQueryVariables,
-} from 'generated/_documents';
-import { handleError } from '../handleError';
+} from 'generated/_documents.js';
+import { handleError } from '../handleError.js';
 
 const gql = String.raw;
 

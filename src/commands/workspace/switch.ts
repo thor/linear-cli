@@ -1,8 +1,8 @@
-import * as inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import fs from 'fs';
 import chalk from 'chalk';
-import Command from '../../base';
-import { Config } from '../../lib/configSchema';
+import Command from '../../base.js';
+import { Config } from '../../lib/configSchema.js';
 
 type PromptResponse = {
   workspace: string;

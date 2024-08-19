@@ -1,10 +1,10 @@
 import { LinearClient, LinearGraphQLClient, Team } from '@linear/sdk';
 import ora from 'ora';
-import { handleError } from '../handleError';
+import { handleError } from '../handleError.js';
 import {
   TeamIssueLabelsQuery,
   TeamIssueLabelsQueryVariables,
-} from '../../generated/_documents';
+} from '../../generated/_documents.js';
 
 const gql = String.raw;
 export const teamIssueLabelQuery = gql`

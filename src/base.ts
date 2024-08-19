@@ -1,9 +1,9 @@
 import { Command, Flags } from '@oclif/core';
 import fs from 'fs';
 import chalk from 'chalk';
-import { Linear } from './lib/linear/Linear';
-import { Config, User, Workspace } from './lib/configSchema';
-import { Cache } from './lib/Cache';
+import { Linear } from './lib/linear/Linear.js';
+import { Config, User, Workspace } from './lib/configSchema.js';
+import { Cache } from './lib/Cache.js';
 
 declare global {
   var currentWorkspace: Workspace;

@@ -1,10 +1,10 @@
 import { LinearGraphQLClient } from '@linear/sdk';
 import ora from 'ora';
-import { handleError } from '../handleError';
+import { handleError } from '../handleError.js';
 import {
   TeamWorkflowStatesQuery,
   TeamWorkflowStatesQueryVariables,
-} from 'generated/_documents';
+} from 'generated/_documents.js';
 
 const gql = String.raw;
 
