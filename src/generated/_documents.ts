@@ -10,16 +10,39 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** Represents a date and time in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago)  */
   DateTime: any;
-  /** The `JSON` scalar type represents JSON values */
   JSON: any;
-  /** The `JSONObject` scalar type represents JSON values as a string */
   JSONObject: any;
-  /** Represents a date in ISO 8601 format. Accepts shortcuts like `2021` to represent midnight Fri Jan 01 2021. Also accepts ISO 8601 durations strings which are added to the current date to create the represented date (e.g '-P2W1D' represents the date that was two weeks and 1 day ago)  */
   TimelessDate: any;
-  /** A universally unique identifier as specified by RFC 4122. */
   UUID: any;
+};
+
+export type AdminJobConfiguration = {
+  currentJob?: InputMaybe<Scalars['String']>;
+  delay?: InputMaybe<Scalars['Float']>;
+  enabled: Scalars['Boolean'];
+  param?: InputMaybe<Scalars['String']>;
+};
+
+export type AdminJobConfigurationPayload = {
+  __typename?: 'AdminJobConfigurationPayload';
+  currentJob?: Maybe<Scalars['String']>;
+  delay: Scalars['Float'];
+  enabled: Scalars['Boolean'];
+  param?: Maybe<Scalars['String']>;
+};
+
+export type AdminJobStatusPayload = {
+  __typename?: 'AdminJobStatusPayload';
+  availableJobs: Array<Scalars['String']>;
+  configuration: AdminJobConfigurationPayload;
+  cursor?: Maybe<Scalars['String']>;
+  startedAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type AirbyteConfigurationInput = {
+  /** Linear export API key. */
+  apiKey: Scalars['String'];
 };
 
 /** An API key. Grants access to the user's resources. */
@@ -34,8 +57,9 @@ export type ApiKey = Node & {
   /** The label of the API key. */
   label: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -48,7 +72,7 @@ export type ApiKeyConnection = {
 };
 
 export type ApiKeyCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The API key value. */
   key: Scalars['String'];
@@ -84,6 +108,8 @@ export type Application = {
   developer: Scalars['String'];
   /** Url of the developer (homepage or docs). */
   developerUrl: Scalars['String'];
+  /** OAuth application's ID. */
+  id: Scalars['String'];
   /** Image of the application. */
   imageUrl?: Maybe<Scalars['String']>;
   /** Application name. */
@@ -98,18 +124,7 @@ export type ArchivePayload = {
   success: Scalars['Boolean'];
 };
 
-/** Contains requested archived model objects. */
-export type ArchiveResponse = {
-  __typename?: 'ArchiveResponse';
-  /** A JSON serialized collection of model objects loaded from the archive */
-  archive: Scalars['String'];
-  /** The version of the remote database. Incremented by 1 for each migration run on the database. */
-  databaseVersion: Scalars['Float'];
-  /** The total number of entities in the archive. */
-  totalCount: Scalars['Float'];
-};
-
-/** [Alpha] Issue attachment (e.g. support ticket, pull request). */
+/** Issue attachment (e.g. support ticket, pull request). */
 export type Attachment = Node & {
   __typename?: 'Attachment';
   /** The time at which the entity was archived. Null if the entity has not been archived. */
@@ -135,12 +150,43 @@ export type Attachment = Node & {
   /** Content for the title line in the Linear attachment widget. */
   title: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Location of the attachment which is also used as an identifier. */
   url: Scalars['String'];
+};
+
+/** Attachment collection filtering options. */
+export type AttachmentCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the attachment. */
+  and?: InputMaybe<Array<AttachmentCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the attachments creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Filters that needs to be matched by all attachments. */
+  every?: InputMaybe<AttachmentFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the attachment. */
+  or?: InputMaybe<Array<AttachmentCollectionFilter>>;
+  /** Filters that needs to be matched by some attachments. */
+  some?: InputMaybe<AttachmentFilter>;
+  /** Comparator for the source type. */
+  sourceType?: InputMaybe<SourceTypeComparator>;
+  /** Comparator for the subtitle. */
+  subtitle?: InputMaybe<NullableStringComparator>;
+  /** Comparator for the title. */
+  title?: InputMaybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+  /** Comparator for the url. */
+  url?: InputMaybe<StringComparator>;
 };
 
 export type AttachmentConnection = {
@@ -153,13 +199,15 @@ export type AttachmentConnection = {
 export type AttachmentCreateInput = {
   /** Create a linked comment with markdown body. */
   commentBody?: InputMaybe<Scalars['String']>;
-  /** [Internal] Create a linked comment with Prosemirror body. Please use `commentBody` instead */
+  /** Create a linked comment with Prosemirror body. Please use `commentBody` instead */
   commentBodyData?: InputMaybe<Scalars['JSONObject']>;
+  /** Create attachment as a user with the provided name. This option is only available to OAuth applications creating attachments in `actor=application` mode. */
+  createAsUser?: InputMaybe<Scalars['String']>;
   /** Indicates if attachments for the same source application should be grouped in the Linear UI. */
   groupBySource?: InputMaybe<Scalars['Boolean']>;
   /** An icon url to display with the attachment. Should be of jpg or png format. Maximum of 1MB in size. Dimensions should be 20x20px for optimal display quality. */
   iconUrl?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The issue to associate the attachment with. */
   issueId: Scalars['String'];
@@ -180,16 +228,20 @@ export type AttachmentEdge = {
   node: Attachment;
 };
 
-/** [Alpha] Attachment filtering options. */
+/** Attachment filtering options. */
 export type AttachmentFilter = {
+  /** Compound filters, all of which need to be matched by the attachment. */
+  and?: InputMaybe<Array<AttachmentFilter>>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the attachments creator must satisfy. */
   creator?: InputMaybe<NullableUserFilter>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Compound filters, one of which need to be matched by the attachment. */
+  or?: InputMaybe<Array<AttachmentFilter>>;
   /** Comparator for the source type. */
-  sourceType?: InputMaybe<NestedStringComparator>;
+  sourceType?: InputMaybe<SourceTypeComparator>;
   /** Comparator for the subtitle. */
   subtitle?: InputMaybe<NullableStringComparator>;
   /** Comparator for the title. */
@@ -240,10 +292,15 @@ export type AuditEntry = Node & {
   ip?: Maybe<Scalars['String']>;
   /** Additional metadata related to the audit entry. */
   metadata?: Maybe<Scalars['JSONObject']>;
+  /** The organization the audit log belongs to. */
+  organization?: Maybe<Organization>;
+  /** Additional information related to the request which performed the action. */
+  requestInformation?: Maybe<Scalars['JSONObject']>;
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -262,7 +319,7 @@ export type AuditEntryEdge = {
   node: AuditEntry;
 };
 
-/** [Alpha] Audit entry filtering options. */
+/** Audit entry filtering options. */
 export type AuditEntryFilter = {
   /** Filters that the audit entry actor must satisfy. */
   actor?: InputMaybe<NullableUserFilter>;
@@ -288,6 +345,15 @@ export type AuditEntryType = {
   type: Scalars['String'];
 };
 
+/** [INTERNAL] An OAuth userId/createdDate tuple */
+export type AuthMembership = {
+  __typename?: 'AuthMembership';
+  /** The date of the authorization */
+  createdAt: Scalars['DateTime'];
+  /** The authorizing userId */
+  userId: Scalars['String'];
+};
+
 export type AuthResolverResponse = {
   __typename?: 'AuthResolverResponse';
   /** Should the signup flow allow access for the domain. */
@@ -306,19 +372,13 @@ export type AuthResolverResponse = {
   users: Array<User>;
 };
 
-/** Public information of the OAuth application, plus the authorized scopes for a given user. */
+/** [INTERNAL] Public information of the OAuth application, plus the authorized scopes for a given user. */
 export type AuthorizedApplication = {
   __typename?: 'AuthorizedApplication';
   /** OAuth application's ID. */
   appId: Scalars['String'];
   /** OAuth application's client ID. */
   clientId: Scalars['String'];
-  /** Information about the application. */
-  description?: Maybe<Scalars['String']>;
-  /** Name of the developer. */
-  developer: Scalars['String'];
-  /** Url of the developer (homepage or docs). */
-  developerUrl: Scalars['String'];
   /** Image of the application. */
   imageUrl?: Maybe<Scalars['String']>;
   /** Application name. */
@@ -329,85 +389,12 @@ export type AuthorizedApplication = {
   webhooksEnabled: Scalars['Boolean'];
 };
 
-/** Relation load request. */
-export type BatchRequest = {
-  /** The indexed key to load models for. */
-  indexedKey: Scalars['String'];
-  /** The value of the indexed key to load models for. */
-  keyValue: Scalars['String'];
-  /** The class name of the model to load. */
-  modelClass: Scalars['String'];
-};
-
-export type BillingDetailsPayload = {
-  __typename?: 'BillingDetailsPayload';
-  /** The customer's email address the invoices are sent to. */
-  email?: Maybe<Scalars['String']>;
-  /** List of invoices, if any. */
-  invoices: Array<Invoice>;
-  /** The payment method. */
-  paymentMethod?: Maybe<Card>;
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type BillingEmailPayload = {
-  __typename?: 'BillingEmailPayload';
-  /** The customer's email address the invoices are sent to. */
-  email?: Maybe<Scalars['String']>;
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type BillingEmailUpdateInput = {
-  /** The email address to which to send invoices. */
-  email: Scalars['String'];
-};
-
 /** Comparator for booleans. */
 export type BooleanComparator = {
   /** Equals constraint. */
   eq?: InputMaybe<Scalars['Boolean']>;
-};
-
-export type CallRoomCreateInput = {
-  /** The identifier of the issue to create the room for. */
-  issueId: Scalars['String'];
-};
-
-export type CallRoomPayload = {
-  __typename?: 'CallRoomPayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-  /** The url to the room. */
-  url?: Maybe<Scalars['String']>;
-};
-
-export type Card = {
-  __typename?: 'Card';
-  /** The brand of the card, e.g. Visa. */
-  brand: Scalars['String'];
-  /** The last four digits used to identify the card. */
-  last4: Scalars['String'];
-};
-
-export type CollaborationDocumentUpdateInput = {
-  /** Client identifier. */
-  clientId: Scalars['String'];
-  /** Document identifier. */
-  issueId: Scalars['String'];
-  /** New document steps from the client. */
-  steps: Array<Scalars['JSON']>;
-  /** Client's document version number. */
-  version: Scalars['Int'];
-};
-
-export type CollaborationDocumentUpdatePayload = {
-  __typename?: 'CollaborationDocumentUpdatePayload';
-  /** Document steps the client has not seen yet and need to rebase it's local steps on. */
-  steps?: Maybe<StepsResponse>;
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
+  /** Not equals constraint. */
+  neq?: InputMaybe<Scalars['Boolean']>;
 };
 
 /** A comment associated with an issue. */
@@ -417,6 +404,10 @@ export type Comment = Node & {
   archivedAt?: Maybe<Scalars['DateTime']>;
   /** The comment content in markdown format. */
   body: Scalars['String'];
+  /** The comment content as a Prosemirror document. */
+  bodyData: Scalars['String'];
+  /** The children of the comment. */
+  children: CommentConnection;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** The time user edited the comment. */
@@ -425,21 +416,38 @@ export type Comment = Node & {
   id: Scalars['ID'];
   /** The issue that the comment is associated with. */
   issue: Issue;
+  /** The parent of the comment. */
+  parent?: Maybe<Comment>;
+  /** Emoji reaction summary, grouped by emoji type */
+  reactionData: Scalars['JSONObject'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Comment's URL. */
   url: Scalars['String'];
   /** The user who wrote the comment. */
-  user: User;
+  user?: Maybe<User>;
 };
 
-/** [Alpha] Comment filtering options. */
+
+/** A comment associated with an issue. */
+export type CommentChildrenArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<CommentFilter>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** Comment filtering options. */
 export type CommentCollectionFilter = {
   /** Compound filters, all of which need to be matched by the comment. */
-  and?: InputMaybe<Array<CommentFilter>>;
+  and?: InputMaybe<Array<CommentCollectionFilter>>;
   /** Comparator for the comments body. */
   body?: InputMaybe<StringComparator>;
   /** Comparator for the created at date. */
@@ -450,8 +458,10 @@ export type CommentCollectionFilter = {
   id?: InputMaybe<IdComparator>;
   /** Filters that the comments issue must satisfy. */
   issue?: InputMaybe<IssueFilter>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the comment. */
-  or?: InputMaybe<Array<CommentFilter>>;
+  or?: InputMaybe<Array<CommentCollectionFilter>>;
   /** Filters that needs to be matched by some comments. */
   some?: InputMaybe<CommentFilter>;
   /** Comparator for the updated at date. */
@@ -472,10 +482,20 @@ export type CommentCreateInput = {
   body?: InputMaybe<Scalars['String']>;
   /** The comment content as a Prosemirror document. */
   bodyData?: InputMaybe<Scalars['JSON']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** Create comment as a user with the provided name. This option is only available to OAuth applications creating comments in `actor=application` mode. */
+  createAsUser?: InputMaybe<Scalars['String']>;
+  /** The date when the comment was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now. */
+  createdAt?: InputMaybe<Scalars['DateTime']>;
+  /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode. */
+  displayIconUrl?: InputMaybe<Scalars['String']>;
+  /** Flag to prevent auto subscription to the issue the comment is created on. */
+  doNotSubscribeToIssue?: InputMaybe<Scalars['Boolean']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The issue to associate the comment with. */
   issueId: Scalars['String'];
+  /** [Internal] The parent under which to nest the comment. */
+  parentId?: InputMaybe<Scalars['String']>;
 };
 
 export type CommentEdge = {
@@ -485,7 +505,7 @@ export type CommentEdge = {
   node: Comment;
 };
 
-/** [Alpha] Comment filtering options. */
+/** Comment filtering options. */
 export type CommentFilter = {
   /** Compound filters, all of which need to be matched by the comment. */
   and?: InputMaybe<Array<CommentFilter>>;
@@ -537,6 +557,8 @@ export type CommitPayload = {
 export type ContactCreateInput = {
   /** User's browser information. */
   browser?: InputMaybe<Scalars['String']>;
+  /** User's Linear client information. */
+  clientVersion?: InputMaybe<Scalars['String']>;
   /** User's device information. */
   device?: InputMaybe<Scalars['String']>;
   /** How disappointed the user would be if they could no longer use Linear. */
@@ -553,6 +575,24 @@ export type ContactPayload = {
   __typename?: 'ContactPayload';
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
+};
+
+/** [INTERNAL] Input for sending a message to the Linear Sales team */
+export type ContactSalesCreateInput = {
+  /** Work email of the person requesting information. */
+  email: Scalars['String'];
+  /** The message the user sent. */
+  message?: InputMaybe<Scalars['String']>;
+  /** Name of the person requesting information. */
+  name: Scalars['String'];
+};
+
+/** [Internal] Comparator for content. */
+export type ContentComparator = {
+  /** [Internal] Contains constraint. */
+  contains?: InputMaybe<Scalars['String']>;
+  /** [Internal] Not-contains constraint. */
+  notContains?: InputMaybe<Scalars['String']>;
 };
 
 export type CreateCsvExportReportPayload = {
@@ -593,7 +633,7 @@ export type CustomView = Node & {
   creator: User;
   /** The description of the custom view. */
   description?: Maybe<Scalars['String']>;
-  /** [Alpha] The filter applied to issues in the custom view. */
+  /** The filter applied to issues in the custom view. */
   filterData: Scalars['JSONObject'];
   /**
    * The filters applied to issues in the custom view.
@@ -613,8 +653,9 @@ export type CustomView = Node & {
   /** The team associated with the custom view. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -637,7 +678,7 @@ export type CustomViewCreateInput = {
   filters?: InputMaybe<Scalars['JSONObject']>;
   /** The icon of the custom view. */
   icon?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The name of the custom view. */
   name: Scalars['String'];
@@ -698,10 +739,14 @@ export type Cycle = Node & {
   completedScopeHistory: Array<Scalars['Float']>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
+  /** The cycle's description. */
+  description?: Maybe<Scalars['String']>;
   /** The end time of the cycle. */
   endsAt: Scalars['DateTime'];
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
+  /** The number of in progress estimation points after each day. */
+  inProgressScopeHistory: Array<Scalars['Float']>;
   /** The total number of issues in the cycle after each day. */
   issueCountHistory: Array<Scalars['Float']>;
   /** Issues associated with the cycle. */
@@ -721,8 +766,9 @@ export type Cycle = Node & {
   /** Issues that weren't completed when the cycle was closed. */
   uncompletedIssuesUponClose: IssueConnection;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -761,9 +807,11 @@ export type CycleConnection = {
 export type CycleCreateInput = {
   /** The completion time of the cycle. If null, the cycle hasn't been completed. */
   completedAt?: InputMaybe<Scalars['DateTime']>;
+  /** The description of the cycle. */
+  description?: InputMaybe<Scalars['String']>;
   /** The end date of the cycle. */
   endsAt: Scalars['DateTime'];
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The custom name of the cycle. */
   name?: InputMaybe<Scalars['String']>;
@@ -780,7 +828,7 @@ export type CycleEdge = {
   node: Cycle;
 };
 
-/** [Alpha] Project filtering options. */
+/** Cycle filtering options. */
 export type CycleFilter = {
   /** Compound filters, all of which need to be matched by the cycle. */
   and?: InputMaybe<Array<CycleFilter>>;
@@ -792,6 +840,16 @@ export type CycleFilter = {
   endsAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the filtering active cycle. */
+  isActive?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering future cycles. */
+  isFuture?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering next cycle. */
+  isNext?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering past cycles. */
+  isPast?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering previous cycle. */
+  isPrevious?: InputMaybe<BooleanComparator>;
   /** Filters that the cycles issues must satisfy. */
   issues?: InputMaybe<IssueCollectionFilter>;
   /** Comparator for the cycle name. */
@@ -821,6 +879,8 @@ export type CyclePayload = {
 export type CycleUpdateInput = {
   /** The end date of the cycle. */
   completedAt?: InputMaybe<Scalars['DateTime']>;
+  /** The description of the cycle. */
+  description?: InputMaybe<Scalars['String']>;
   /** The end date of the cycle. */
   endsAt?: InputMaybe<Scalars['DateTime']>;
   /** The custom name of the cycle. */
@@ -849,22 +909,20 @@ export type DateComparator = {
   nin?: InputMaybe<Array<Scalars['DateTime']>>;
 };
 
-export type DebugPayload = {
-  __typename?: 'DebugPayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
+/** The day of the week. */
+export enum Day {
+  Friday = 'Friday',
+  Monday = 'Monday',
+  Saturday = 'Saturday',
+  Sunday = 'Sunday',
+  Thursday = 'Thursday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday'
+}
 
 export type DeleteOrganizationInput = {
   /** The deletion code to confirm operation. */
   deletionCode: Scalars['String'];
-};
-
-/** Contains the requested dependencies. */
-export type DependencyResponse = {
-  __typename?: 'DependencyResponse';
-  /** A JSON serialized collection of dependencies. */
-  dependencies: Scalars['String'];
 };
 
 /** A document for a project. */
@@ -893,8 +951,9 @@ export type Document = Node & {
   /** The document title. */
   title: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The user who last updated the document. */
@@ -913,11 +972,11 @@ export type DocumentCreateInput = {
   color?: InputMaybe<Scalars['String']>;
   /** The document content as markdown. */
   content?: InputMaybe<Scalars['String']>;
-  /** [Internal] The document content as a Prosemirror document. */
+  /** The document content as a Prosemirror document. */
   contentData?: InputMaybe<Scalars['JSONObject']>;
   /** The icon of the document. */
   icon?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** Related project for the document. */
   projectId: Scalars['String'];
@@ -942,34 +1001,12 @@ export type DocumentPayload = {
   success: Scalars['Boolean'];
 };
 
-/** Collaborative editing steps for documents. */
-export type DocumentStep = Node & {
-  __typename?: 'DocumentStep';
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars['DateTime']>;
-  /** Connected client ID. */
-  clientId: Scalars['String'];
-  /** The time at which the entity was created. */
-  createdAt: Scalars['DateTime'];
-  /** The unique identifier of the entity. */
-  id: Scalars['ID'];
-  /** Step data. */
-  step: Scalars['JSON'];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars['DateTime'];
-  /** Step version. */
-  version: Scalars['Float'];
-};
-
 export type DocumentUpdateInput = {
   /** The color of the icon. */
   color?: InputMaybe<Scalars['String']>;
   /** The document content as markdown. */
   content?: InputMaybe<Scalars['String']>;
-  /** [Internal] The document content as a Prosemirror document. */
+  /** The document content as a Prosemirror document. */
   contentData?: InputMaybe<Scalars['JSONObject']>;
   /** The icon of the document. */
   icon?: InputMaybe<Scalars['String']>;
@@ -979,68 +1016,14 @@ export type DocumentUpdateInput = {
   title?: InputMaybe<Scalars['String']>;
 };
 
-/** A version of a document. */
-export type DocumentVersion = Node & {
-  __typename?: 'DocumentVersion';
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars['DateTime']>;
-  /** The document's content in markdown format. */
-  content?: Maybe<Scalars['String']>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars['DateTime'];
-  /** The user who created the version. */
-  creator: User;
-  /** The unique identifier of the entity. */
-  id: Scalars['ID'];
-  /** The project that the document is associated with. */
-  project: Project;
-  /** The version revision number. */
-  revision: Scalars['Float'];
-  /** The document's title. */
-  title: Scalars['String'];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars['DateTime'];
-};
-
-export type DocumentVersionConnection = {
-  __typename?: 'DocumentVersionConnection';
-  edges: Array<DocumentVersionEdge>;
-  nodes: Array<DocumentVersion>;
-  pageInfo: PageInfo;
-};
-
-export type DocumentVersionEdge = {
-  __typename?: 'DocumentVersionEdge';
-  /** Used in `before` and `after` args */
-  cursor: Scalars['String'];
-  node: DocumentVersion;
-};
-
-export type DocumentationSearchPayload = {
-  __typename?: 'DocumentationSearchPayload';
-  /** The content of the documentation. */
-  content: Scalars['String'];
-  /** The time the documentation was published. */
-  publishedAt: Scalars['DateTime'];
-  /** The title of the found documentation. */
-  title: Scalars['String'];
-  /** The type of documentation that was found. */
-  type?: Maybe<Scalars['String']>;
-  /** The url to the documentation. */
-  url: Scalars['String'];
-};
-
 export type EmailSubscribeInput = {
-  /** Email to subscribe. */
+  /** [INTERNAL] Email to subscribe. */
   email: Scalars['String'];
 };
 
 export type EmailSubscribePayload = {
   __typename?: 'EmailSubscribePayload';
-  /** Whether the operation was successful. */
+  /** [INTERNAL] Whether the operation was successful. */
   success: Scalars['Boolean'];
 };
 
@@ -1096,8 +1079,9 @@ export type Emoji = Node & {
   /** The source of the emoji. */
   source: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The emoji image URL. */
@@ -1112,7 +1096,7 @@ export type EmojiConnection = {
 };
 
 export type EmojiCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The name of the custom emoji. */
   name: Scalars['String'];
@@ -1135,6 +1119,48 @@ export type EmojiPayload = {
   lastSyncId: Scalars['Float'];
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
+};
+
+/** A basic entity. */
+export type Entity = {
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+/** Comparator for estimates. */
+export type EstimateComparator = {
+  /** Compound filters, one of which need to be matched by the estimate. */
+  and?: InputMaybe<Array<NullableNumberComparator>>;
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars['Float']>;
+  /** Greater-than constraint. Matches any values that are greater than the given value. */
+  gt?: InputMaybe<Scalars['Float']>;
+  /** Greater-than-or-equal constraint. Matches any values that are greater than or equal to the given value. */
+  gte?: InputMaybe<Scalars['Float']>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<Scalars['Float']>>;
+  /** Less-than constraint. Matches any values that are less than the given value. */
+  lt?: InputMaybe<Scalars['Float']>;
+  /** Less-than-or-equal constraint. Matches any values that are less than or equal to the given value. */
+  lte?: InputMaybe<Scalars['Float']>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<Scalars['Float']>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<Scalars['Float']>>;
+  /** Null constraint. Matches any non-null values if the given value is false, otherwise it matches null values. */
+  null?: InputMaybe<Scalars['Boolean']>;
+  /** Compound filters, all of which need to be matched by the estimate. */
+  or?: InputMaybe<Array<NullableNumberComparator>>;
 };
 
 export type EventCreateInput = {
@@ -1181,17 +1207,24 @@ export type Favorite = Node & {
   label?: Maybe<IssueLabel>;
   /** The parent folder of the favorite. */
   parent?: Maybe<Favorite>;
+  /** The team of the favorited predefiend view.  */
+  predefinedViewTeam?: Maybe<Team>;
+  /** The type of favorited predefiend view. */
+  predefinedViewType?: Maybe<Scalars['String']>;
   /** The favorited project. */
   project?: Maybe<Project>;
   /** The favorited team of the project. */
   projectTeam?: Maybe<Team>;
+  /** The favorited roadmap. */
+  roadmap?: Maybe<Roadmap>;
   /** The order of the item in the favorites list. */
   sortOrder: Scalars['Float'];
   /** The type of the favorite. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The owner of the favorite. */
@@ -1233,10 +1266,16 @@ export type FavoriteCreateInput = {
   labelId?: InputMaybe<Scalars['String']>;
   /** The parent folder of the favorite. */
   parentId?: InputMaybe<Scalars['String']>;
+  /** The identifier of team for the predefined view to favorite. */
+  predefinedViewTeamId?: InputMaybe<Scalars['String']>;
+  /** The type of the predefined view to favorite. */
+  predefinedViewType?: InputMaybe<Scalars['String']>;
   /** The identifier of the project to favorite. */
   projectId?: InputMaybe<Scalars['String']>;
   /** The identifier of the project team to favorite. */
   projectTeamId?: InputMaybe<Scalars['String']>;
+  /** The identifier of the roadmap to favorite. */
+  roadmapId?: InputMaybe<Scalars['String']>;
   /** The position of the item in the favorites list. */
   sortOrder?: InputMaybe<Scalars['Float']>;
 };
@@ -1259,23 +1298,12 @@ export type FavoritePayload = {
 };
 
 export type FavoriteUpdateInput = {
-  /** The id of the folder to move the favorite under. */
+  /** The name of the favorite folder. */
+  folderName?: InputMaybe<Scalars['String']>;
+  /** The identifier (in UUID v4 format) of the folder to move the favorite under. */
   parentId?: InputMaybe<Scalars['String']>;
   /** The position of the item in the favorites list. */
   sortOrder?: InputMaybe<Scalars['Float']>;
-};
-
-export type FeedbackCreateInput = {
-  /** How disappointed the user would be if he/she could no longer use Linear. */
-  disappointmentRating: Scalars['Float'];
-  /** The feedback the user sent. */
-  feedback: Scalars['String'];
-};
-
-export type FeedbackPayload = {
-  __typename?: 'FeedbackPayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
 };
 
 /** Object representing Figma preview information. */
@@ -1307,6 +1335,62 @@ export type FrontAttachmentPayload = {
   success: Scalars['Boolean'];
 };
 
+/** Front specific settings. */
+export type FrontSettings = {
+  __typename?: 'FrontSettings';
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: Maybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: Maybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: Maybe<Scalars['Boolean']>;
+};
+
+export type FrontSettingsInput = {
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: InputMaybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type GitHubCommitIntegrationPayload = {
+  __typename?: 'GitHubCommitIntegrationPayload';
+  /** The integration that was created or updated. */
+  integration?: Maybe<Integration>;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+  /** The webhook secret to provide to GitHub. */
+  webhookSecret: Scalars['String'];
+};
+
+/** Metadata and settings for a GitHub integration. */
+export type GitHubSettings = {
+  __typename?: 'GitHubSettings';
+  /** The avatar URL for the GitHub organization */
+  orgAvatarUrl: Scalars['String'];
+  /** The GitHub organization's name */
+  orgLogin: Scalars['String'];
+};
+
+export type GitHubSettingsInput = {
+  /** The avatar URL for the GitHub organization */
+  orgAvatarUrl: Scalars['String'];
+  /** The GitHub organization's name */
+  orgLogin: Scalars['String'];
+};
+
 /** GitHub OAuth token, plus information about the organizations the user is a member of. */
 export type GithubOAuthTokenPayload = {
   __typename?: 'GithubOAuthTokenPayload';
@@ -1321,6 +1405,8 @@ export type GithubOrg = {
   __typename?: 'GithubOrg';
   /** GitHub organization id. */
   id: Scalars['String'];
+  /** Whether or not this org is the user's personal repositories. */
+  isPersonal?: Maybe<Scalars['Boolean']>;
   /** The login for the GitHub organization. */
   login: Scalars['String'];
   /** The name of the GitHub organization. */
@@ -1389,6 +1475,47 @@ export type ImageUploadFromUrlPayload = {
   url?: Maybe<Scalars['String']>;
 };
 
+/** A initiative that contains projects. */
+export type Initiative = Node & {
+  __typename?: 'Initiative';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The initiative's description. */
+  description?: Maybe<Scalars['String']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The name of the initiative. */
+  name: Scalars['String'];
+  /** The organization that the initiative belongs to. */
+  organization: Organization;
+  /** The sort order for the initiative. */
+  sortOrder: Scalars['Float'];
+  /** The estimated completion date of the initiative. */
+  targetDate?: Maybe<Scalars['TimelessDate']>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type InitiativeConnection = {
+  __typename?: 'InitiativeConnection';
+  edges: Array<InitiativeEdge>;
+  nodes: Array<Initiative>;
+  pageInfo: PageInfo;
+};
+
+export type InitiativeEdge = {
+  __typename?: 'InitiativeEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: Initiative;
+};
+
 /** An integration with an external service. */
 export type Integration = Node & {
   __typename?: 'Integration';
@@ -1407,8 +1534,9 @@ export type Integration = Node & {
   /** The team that the integration is associated with. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -1437,6 +1565,19 @@ export type IntegrationPayload = {
   success: Scalars['Boolean'];
 };
 
+export type IntegrationRequestInput = {
+  /** Email associated with the request. */
+  email?: InputMaybe<Scalars['String']>;
+  /** Name of the requested integration. */
+  name: Scalars['String'];
+};
+
+export type IntegrationRequestPayload = {
+  __typename?: 'IntegrationRequestPayload';
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
 /** An integration resource created by an external service. */
 export type IntegrationResource = Node & {
   __typename?: 'IntegrationResource';
@@ -1449,7 +1590,7 @@ export type IntegrationResource = Node & {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /** The integration that the resource is associated with. */
-  integration: Integration;
+  integration?: Maybe<Integration>;
   /** The issue that the resource is associated with. */
   issue: Issue;
   /** Pull request information for GitHub pull requests and GitLab merge requests. */
@@ -1459,8 +1600,9 @@ export type IntegrationResource = Node & {
   /** The integration's type. */
   resourceType: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -1495,28 +1637,217 @@ export type IntegrationResourceEdge = {
 /** The integration resource's settings */
 export type IntegrationSettings = {
   __typename?: 'IntegrationSettings';
+  front?: Maybe<FrontSettings>;
+  gitHub?: Maybe<GitHubSettings>;
   googleSheets?: Maybe<GoogleSheetsSettings>;
   intercom?: Maybe<IntercomSettings>;
   jira?: Maybe<JiraSettings>;
   sentry?: Maybe<SentrySettings>;
+  slackOrgProjectUpdatesPost?: Maybe<SlackPostSettings>;
   slackPost?: Maybe<SlackPostSettings>;
   slackProjectPost?: Maybe<SlackPostSettings>;
   zendesk?: Maybe<ZendeskSettings>;
 };
 
 export type IntegrationSettingsInput = {
+  front?: InputMaybe<FrontSettingsInput>;
+  gitHub?: InputMaybe<GitHubSettingsInput>;
   googleSheets?: InputMaybe<GoogleSheetsSettingsInput>;
   intercom?: InputMaybe<IntercomSettingsInput>;
   jira?: InputMaybe<JiraSettingsInput>;
   sentry?: InputMaybe<SentrySettingsInput>;
+  slackOrgProjectUpdatesPost?: InputMaybe<SlackPostSettingsInput>;
   slackPost?: InputMaybe<SlackPostSettingsInput>;
   slackProjectPost?: InputMaybe<SlackPostSettingsInput>;
   zendesk?: InputMaybe<ZendeskSettingsInput>;
 };
 
+/** Join table between templates and integrations */
+export type IntegrationTemplate = Node & {
+  __typename?: 'IntegrationTemplate';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The integration that the template is associated with. */
+  integration: Integration;
+  /** The template that the integration is associated with. */
+  template: Template;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type IntegrationTemplateConnection = {
+  __typename?: 'IntegrationTemplateConnection';
+  edges: Array<IntegrationTemplateEdge>;
+  nodes: Array<IntegrationTemplate>;
+  pageInfo: PageInfo;
+};
+
+export type IntegrationTemplateCreateInput = {
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The identifier of the integration. */
+  integrationId: Scalars['String'];
+  /** The identifier of the template. */
+  templateId: Scalars['String'];
+};
+
+export type IntegrationTemplateEdge = {
+  __typename?: 'IntegrationTemplateEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: IntegrationTemplate;
+};
+
+export type IntegrationTemplatePayload = {
+  __typename?: 'IntegrationTemplatePayload';
+  /** The IntegrationTemplate that was created or updated. */
+  integrationTemplate: IntegrationTemplate;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+/** The configuration of all integrations for a project or a team. */
+export type IntegrationsSettings = Node & {
+  __typename?: 'IntegrationsSettings';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** Project which those settings apply to. */
+  project?: Maybe<Project>;
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a new issue is created for the project or the team. */
+  slackIssueCreated?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
+  slackIssueNewComment?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when an SLA is breached */
+  slackIssueSlaBreached?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
+  slackIssueStatusChangedAll?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
+  slackIssueStatusChangedDone?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created. */
+  slackProjectUpdateCreated?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a new project update to milestone Slack channels. */
+  slackProjectUpdateCreatedToMilestone?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a new project update to team Slack channels. */
+  slackProjectUpdateCreatedToTeam?: Maybe<Scalars['Boolean']>;
+  /** Whether to send a new project update to workspace Slack channel. */
+  slackProjectUpdateCreatedToWorkspace?: Maybe<Scalars['Boolean']>;
+  /** Team which those settings apply to. */
+  team?: Maybe<Team>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type IntegrationsSettingsConnection = {
+  __typename?: 'IntegrationsSettingsConnection';
+  edges: Array<IntegrationsSettingsEdge>;
+  nodes: Array<IntegrationsSettings>;
+  pageInfo: PageInfo;
+};
+
+export type IntegrationsSettingsCreateInput = {
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The identifier of the project to create settings for. */
+  projectId?: InputMaybe<Scalars['String']>;
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a new issue is created for the project or the team. */
+  slackIssueCreated?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
+  slackIssueNewComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to receive notification when an SLA has breached on Slack. */
+  slackIssueSlaBreached?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
+  slackIssueStatusChangedAll?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
+  slackIssueStatusChangedDone?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created. */
+  slackProjectUpdateCreated?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to milestone channels. */
+  slackProjectUpdateCreatedToMilestone?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to team channels. */
+  slackProjectUpdateCreatedToTeam?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to workspace channel. */
+  slackProjectUpdateCreatedToWorkspace?: InputMaybe<Scalars['Boolean']>;
+  /** The identifier of the team to create settings for. */
+  teamId?: InputMaybe<Scalars['String']>;
+};
+
+export type IntegrationsSettingsEdge = {
+  __typename?: 'IntegrationsSettingsEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: IntegrationsSettings;
+};
+
+export type IntegrationsSettingsPayload = {
+  __typename?: 'IntegrationsSettingsPayload';
+  /** The settings that were created or updated. */
+  integrationsSettings: IntegrationsSettings;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+export type IntegrationsSettingsUpdateInput = {
+  /** Whether to send a Slack message when a new issue is added to triage. */
+  slackIssueAddedToTriage?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a new issue is created for the project or the team. */
+  slackIssueCreated?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a comment is created on any of the project or team's issues. */
+  slackIssueNewComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to receive notification when an SLA has breached on Slack. */
+  slackIssueSlaBreached?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when an SLA is at high risk */
+  slackIssueSlaHighRisk?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues has a change in status. */
+  slackIssueStatusChangedAll?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when any of the project or team's issues change to completed or cancelled. */
+  slackIssueStatusChangedDone?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created. */
+  slackProjectUpdateCreated?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to milestone channels. */
+  slackProjectUpdateCreatedToMilestone?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to team channels. */
+  slackProjectUpdateCreatedToTeam?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to send a Slack message when a project update is created to workspace channel. */
+  slackProjectUpdateCreatedToWorkspace?: InputMaybe<Scalars['Boolean']>;
+};
+
 /** Intercom specific settings. */
 export type IntercomSettings = {
   __typename?: 'IntercomSettings';
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: Maybe<Scalars['Boolean']>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: Maybe<Scalars['Boolean']>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
@@ -1524,24 +1855,16 @@ export type IntercomSettings = {
 };
 
 export type IntercomSettingsInput = {
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: InputMaybe<Scalars['Boolean']>;
   /** Whether an internal message should be added when someone comments on an issue. */
   sendNoteOnComment?: InputMaybe<Scalars['Boolean']>;
   /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
   sendNoteOnStatusChange?: InputMaybe<Scalars['Boolean']>;
-};
-
-export type Invoice = {
-  __typename?: 'Invoice';
-  /** The creation date of the invoice. */
-  created: Scalars['DateTime'];
-  /** The due date of the invoice. */
-  dueDate?: Maybe<Scalars['TimelessDate']>;
-  /** The status of the invoice. */
-  status: Scalars['String'];
-  /** The invoice total, in cents. */
-  total: Scalars['Float'];
-  /** The URL at which the invoice can be viewed or paid. */
-  url?: Maybe<Scalars['String']>;
 };
 
 /** An issue. */
@@ -1582,6 +1905,8 @@ export type Issue = Node & {
   cycle?: Maybe<Cycle>;
   /** The issue's description in markdown format. */
   description?: Maybe<Scalars['String']>;
+  /** [Internal] The issue's description as a Prosemirror document. */
+  descriptionData?: Maybe<Scalars['JSON']>;
   /** The date at which the issue is due. */
   dueDate?: Maybe<Scalars['TimelessDate']>;
   /** The estimate of the complexity of the issue.. */
@@ -1592,7 +1917,10 @@ export type Issue = Node & {
   id: Scalars['ID'];
   /** Issue's human readable identifier (e.g. ENG-123). */
   identifier: Scalars['String'];
-  /** Integration resources for this issue. */
+  /**
+   * [DEPRECATED] Integration resources for this issue.
+   * @deprecated This field will soon be deprecated, please use `attachments` instead
+   */
   integrationResources: IntegrationResourceConnection;
   /** Inverse relations associated with this issue. */
   inverseRelations: IssueRelationConnection;
@@ -1610,8 +1938,14 @@ export type Issue = Node & {
   priorityLabel: Scalars['String'];
   /** The project that the issue is associated with. */
   project?: Maybe<Project>;
+  /** [ALPHA] The projectMilestone that the issue is associated with. */
+  projectMilestone?: Maybe<ProjectMilestone>;
   /** Relations associated with this issue. */
   relations: IssueRelationConnection;
+  /** [Internal] The time at which the issue's SLA will breach. */
+  slaBreachesAt?: Maybe<Scalars['DateTime']>;
+  /** [Internal] The time at which the issue's SLA began. */
+  slaStartedAt?: Maybe<Scalars['DateTime']>;
   /** The user who snoozed the issue. */
   snoozedBy?: Maybe<User>;
   /** The time until an issue will be snoozed in Triage view. */
@@ -1620,6 +1954,8 @@ export type Issue = Node & {
   sortOrder: Scalars['Float'];
   /** The time at which the issue was moved into started state. */
   startedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the issue entered triage. */
+  startedTriageAt?: Maybe<Scalars['DateTime']>;
   /** The workflow state that the issue is associated with. */
   state: WorkflowState;
   /** The order of the item in the sub-issue list. Only set if the issue has a parent. */
@@ -1632,9 +1968,12 @@ export type Issue = Node & {
   title: Scalars['String'];
   /** A flag that indicates whether the issue is in the trash bin. */
   trashed?: Maybe<Scalars['Boolean']>;
+  /** The time at which the issue left triage. */
+  triagedAt?: Maybe<Scalars['DateTime']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Issue URL. */
@@ -1756,14 +2095,14 @@ export type IssueBatchPayload = {
   success: Scalars['Boolean'];
 };
 
-/** [Alpha] Issue filtering options. */
+/** Issue filtering options. */
 export type IssueCollectionFilter = {
   /** Compound filters, all of which need to be matched by the issue. */
-  and?: InputMaybe<Array<IssueFilter>>;
+  and?: InputMaybe<Array<IssueCollectionFilter>>;
   /** Filters that the issues assignee must satisfy. */
   assignee?: InputMaybe<NullableUserFilter>;
   /** Filters that the issues attachments must satisfy. */
-  attachments?: InputMaybe<AttachmentFilter>;
+  attachments?: InputMaybe<AttachmentCollectionFilter>;
   /** Comparator for the issues auto archived at date. */
   autoArchivedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the issues auto closed at date. */
@@ -1779,7 +2118,7 @@ export type IssueCollectionFilter = {
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the issues creator must satisfy. */
-  creator?: InputMaybe<UserFilter>;
+  creator?: InputMaybe<NullableUserFilter>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: InputMaybe<NullableCycleFilter>;
   /** Comparator for the issues description. */
@@ -1787,21 +2126,35 @@ export type IssueCollectionFilter = {
   /** Comparator for the issues due date. */
   dueDate?: InputMaybe<NullableTimelessDateComparator>;
   /** Comparator for the issues estimate. */
-  estimate?: InputMaybe<NumberComparator>;
+  estimate?: InputMaybe<EstimateComparator>;
   /** Filters that needs to be matched by all issues. */
   every?: InputMaybe<IssueFilter>;
+  /** Comparator for filtering issues which are blocked. */
+  hasBlockedByRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are blocking. */
+  hasBlockingRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are duplicates. */
+  hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues with relations. */
+  hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
   /** Filters that issue labels must satisfy. */
   labels?: InputMaybe<IssueLabelCollectionFilter>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
   /** Comparator for the issues number. */
   number?: InputMaybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
-  or?: InputMaybe<Array<IssueFilter>>;
+  or?: InputMaybe<Array<IssueCollectionFilter>>;
+  /** Filters that the issue parent must satisfy. */
+  parent?: InputMaybe<NullableIssueFilter>;
   /** Comparator for the issues priority. */
   priority?: InputMaybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: InputMaybe<NullableProjectFilter>;
+  /** [Internal] Comparator for the issues content. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: InputMaybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
@@ -1812,6 +2165,8 @@ export type IssueCollectionFilter = {
   startedAt?: InputMaybe<NullableDateComparator>;
   /** Filters that the issues state must satisfy. */
   state?: InputMaybe<WorkflowStateFilter>;
+  /** Filters that issue subscribers must satisfy. */
+  subscribers?: InputMaybe<UserCollectionFilter>;
   /** Filters that the issues team must satisfy. */
   team?: InputMaybe<TeamFilter>;
   /** Comparator for the issues title. */
@@ -1832,17 +2187,23 @@ export type IssueCreateInput = {
   assigneeId?: InputMaybe<Scalars['String']>;
   /** The position of the issue in its column on the board view. */
   boardOrder?: InputMaybe<Scalars['Float']>;
+  /** Create issue as a user with the provided name. This option is only available to OAuth applications creating issues in `actor=application` mode. */
+  createAsUser?: InputMaybe<Scalars['String']>;
+  /** The date when the issue was created (e.g. if importing from another system). Must be a date in the past. If none is provided, the backend will generate the time as now. */
+  createdAt?: InputMaybe<Scalars['DateTime']>;
   /** The cycle associated with the issue. */
   cycleId?: InputMaybe<Scalars['String']>;
   /** The issue description in markdown format. */
   description?: InputMaybe<Scalars['String']>;
   /** The issue description as a Prosemirror document. */
   descriptionData?: InputMaybe<Scalars['JSON']>;
+  /** Provide an external user avatar URL. Can only be used in conjunction with the `createAsUser` options. This option is only available to OAuth applications creating comments in `actor=application` mode. */
+  displayIconUrl?: InputMaybe<Scalars['String']>;
   /** The date at which the issue is due. */
   dueDate?: InputMaybe<Scalars['TimelessDate']>;
   /** The estimated complexity of the issue. */
   estimate?: InputMaybe<Scalars['Int']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The identifiers of the issue labels associated with this ticket. */
   labelIds?: InputMaybe<Array<Scalars['String']>>;
@@ -1852,6 +2213,8 @@ export type IssueCreateInput = {
   priority?: InputMaybe<Scalars['Int']>;
   /** The project associated with the issue. */
   projectId?: InputMaybe<Scalars['String']>;
+  /** [ALPHA] The project milestone associated with the issue. */
+  projectMilestoneId?: InputMaybe<Scalars['String']>;
   /** The comment the issue is referencing. */
   referenceCommentId?: InputMaybe<Scalars['String']>;
   /** The position of the issue related to other issues. */
@@ -1868,26 +2231,137 @@ export type IssueCreateInput = {
   title: Scalars['String'];
 };
 
-export type IssueDescriptionHistory = {
-  __typename?: 'IssueDescriptionHistory';
-  /** The ID of the author of the change. */
-  actorId?: Maybe<Scalars['String']>;
-  /** The description data of the issue as a JSON serialized string. */
-  descriptionData: Scalars['String'];
-  /** The UUID of the change. */
-  id: Scalars['String'];
-  /** The type of the revision, whether it was the creation or update of the issue. */
-  type: Scalars['String'];
-  /** The date when the description was updated. */
+/** [Internal] A draft issue. */
+export type IssueDraft = Node & {
+  __typename?: 'IssueDraft';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The user assigned to the draft. */
+  assigneeId?: Maybe<Scalars['String']>;
+  /** Serialized array of JSONs representing attachments. */
+  attachments: Scalars['JSONObject'];
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The user who created the draft. */
+  creator: User;
+  /** The cycle associated with the draft. */
+  cycleId?: Maybe<Scalars['String']>;
+  /** The draft's description in markdown format. */
+  description?: Maybe<Scalars['String']>;
+  /** [Internal] The draft's description as a Prosemirror document. */
+  descriptionData?: Maybe<Scalars['JSON']>;
+  /** The date at which the issue would be due. */
+  dueDate?: Maybe<Scalars['TimelessDate']>;
+  /** The estimate of the complexity of the draft. */
+  estimate?: Maybe<Scalars['Float']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The parent draft of the draft. */
+  parent?: Maybe<IssueDraft>;
+  /** The parent issue of the draft. */
+  parentIssue?: Maybe<Issue>;
+  /** The priority of the draft. */
+  priority: Scalars['Float'];
+  /** Label for the priority. */
+  priorityLabel: Scalars['String'];
+  /** The project associated with the draft. */
+  projectId?: Maybe<Scalars['String']>;
+  /** The workflow state associated with the draft. */
+  stateId: Scalars['String'];
+  /** The order of items in the sub-draft list. Only set if the draft has `parent` set. */
+  subIssueSortOrder?: Maybe<Scalars['Float']>;
+  /** The team associated with the draft. */
+  teamId: Scalars['String'];
+  /** The draft's title. */
+  title: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
   updatedAt: Scalars['DateTime'];
 };
 
-export type IssueDescriptionHistoryPayload = {
-  __typename?: 'IssueDescriptionHistoryPayload';
-  /** The issue that was created or updated. */
-  history?: Maybe<Array<IssueDescriptionHistory>>;
+export type IssueDraftCreateInput = {
+  /** The identifier of the user to assign the draft to. */
+  assigneeId?: InputMaybe<Scalars['String']>;
+  /** The attachments associated with this draft. */
+  attachments?: InputMaybe<Scalars['JSONObject']>;
+  /** The cycle associated with the draft. */
+  cycleId?: InputMaybe<Scalars['String']>;
+  /** The draft description in markdown format. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The draft description as a Prosemirror document. */
+  descriptionData?: InputMaybe<Scalars['JSON']>;
+  /** The date at which the draft is due. */
+  dueDate?: InputMaybe<Scalars['TimelessDate']>;
+  /** The estimated complexity of the draft. */
+  estimate?: InputMaybe<Scalars['Int']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The identifiers of the issue labels associated with this draft. */
+  labelIds?: InputMaybe<Array<Scalars['String']>>;
+  /** The identifier of the parent draft. */
+  parentId?: InputMaybe<Scalars['String']>;
+  /** The identifier of the parent issue. */
+  parentIssueId?: InputMaybe<Scalars['String']>;
+  /** The priority of the draft. */
+  priority?: InputMaybe<Scalars['Int']>;
+  /** The project associated with the draft. */
+  projectId?: InputMaybe<Scalars['String']>;
+  /** The team state of the draft. */
+  stateId?: InputMaybe<Scalars['String']>;
+  /** The position of the draft in parent draft's sub-draft list. */
+  subIssueSortOrder?: InputMaybe<Scalars['Float']>;
+  /** The identifier or key of the team associated with the draft. */
+  teamId: Scalars['String'];
+  /** The title of the draft. */
+  title: Scalars['String'];
+};
+
+export type IssueDraftPayload = {
+  __typename?: 'IssueDraftPayload';
+  /** The draft that was created or updated. */
+  issueDraft: IssueDraft;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
+};
+
+export type IssueDraftUpdateInput = {
+  /** The identifier of the user to assign the draft to. */
+  assigneeId?: InputMaybe<Scalars['String']>;
+  /** The attachments associated with this draft. */
+  attachments?: InputMaybe<Scalars['JSONObject']>;
+  /** The cycle associated with the draft. */
+  cycleId?: InputMaybe<Scalars['String']>;
+  /** The draft description in markdown format. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The draft description as a Prosemirror document. */
+  descriptionData?: InputMaybe<Scalars['JSON']>;
+  /** The date at which the draft is due. */
+  dueDate?: InputMaybe<Scalars['TimelessDate']>;
+  /** The estimated complexity of the draft. */
+  estimate?: InputMaybe<Scalars['Int']>;
+  /** The identifiers of the issue labels associated with this draft. */
+  labelIds?: InputMaybe<Array<Scalars['String']>>;
+  /** The identifier of the parent draft. */
+  parentId?: InputMaybe<Scalars['String']>;
+  /** The identifier of the parent issue. */
+  parentIssueId?: InputMaybe<Scalars['String']>;
+  /** The priority of the draft. */
+  priority?: InputMaybe<Scalars['Int']>;
+  /** The project associated with the draft. */
+  projectId?: InputMaybe<Scalars['String']>;
+  /** The team state of the draft. */
+  stateId?: InputMaybe<Scalars['String']>;
+  /** The position of the draft in parent draft's sub-draft list. */
+  subIssueSortOrder?: InputMaybe<Scalars['Float']>;
+  /** The identifier or key of the team associated with the draft. */
+  teamId?: InputMaybe<Scalars['String']>;
+  /** The title of the draft. */
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type IssueEdge = {
@@ -1897,14 +2371,14 @@ export type IssueEdge = {
   node: Issue;
 };
 
-/** [Alpha] Issue filtering options. */
+/** Issue filtering options. */
 export type IssueFilter = {
   /** Compound filters, all of which need to be matched by the issue. */
   and?: InputMaybe<Array<IssueFilter>>;
   /** Filters that the issues assignee must satisfy. */
   assignee?: InputMaybe<NullableUserFilter>;
   /** Filters that the issues attachments must satisfy. */
-  attachments?: InputMaybe<AttachmentFilter>;
+  attachments?: InputMaybe<AttachmentCollectionFilter>;
   /** Comparator for the issues auto archived at date. */
   autoArchivedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the issues auto closed at date. */
@@ -1920,7 +2394,7 @@ export type IssueFilter = {
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the issues creator must satisfy. */
-  creator?: InputMaybe<UserFilter>;
+  creator?: InputMaybe<NullableUserFilter>;
   /** Filters that the issues cycle must satisfy. */
   cycle?: InputMaybe<NullableCycleFilter>;
   /** Comparator for the issues description. */
@@ -1928,7 +2402,15 @@ export type IssueFilter = {
   /** Comparator for the issues due date. */
   dueDate?: InputMaybe<NullableTimelessDateComparator>;
   /** Comparator for the issues estimate. */
-  estimate?: InputMaybe<NumberComparator>;
+  estimate?: InputMaybe<EstimateComparator>;
+  /** Comparator for filtering issues which are blocked. */
+  hasBlockedByRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are blocking. */
+  hasBlockingRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are duplicates. */
+  hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues with relations. */
+  hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
   /** Filters that issue labels must satisfy. */
@@ -1937,10 +2419,14 @@ export type IssueFilter = {
   number?: InputMaybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the issue. */
   or?: InputMaybe<Array<IssueFilter>>;
+  /** Filters that the issue parent must satisfy. */
+  parent?: InputMaybe<NullableIssueFilter>;
   /** Comparator for the issues priority. */
   priority?: InputMaybe<NullableNumberComparator>;
   /** Filters that the issues project must satisfy. */
   project?: InputMaybe<NullableProjectFilter>;
+  /** [Internal] Comparator for the issues content. */
+  searchableContent?: InputMaybe<ContentComparator>;
   /** Filters that the issues snoozer must satisfy. */
   snoozedBy?: InputMaybe<NullableUserFilter>;
   /** Comparator for the issues snoozed until date. */
@@ -1949,6 +2435,8 @@ export type IssueFilter = {
   startedAt?: InputMaybe<NullableDateComparator>;
   /** Filters that the issues state must satisfy. */
   state?: InputMaybe<WorkflowStateFilter>;
+  /** Filters that issue subscribers must satisfy. */
+  subscribers?: InputMaybe<UserCollectionFilter>;
   /** Filters that the issues team must satisfy. */
   team?: InputMaybe<TeamFilter>;
   /** Comparator for the issues title. */
@@ -1962,34 +2450,56 @@ export type IssueHistory = Node & {
   __typename?: 'IssueHistory';
   /** The user who made these changes. If null, possibly means that the change made by an integration. */
   actor?: Maybe<User>;
+  /** The id of user who made these changes. If null, possibly means that the change made by an integration. */
+  actorId?: Maybe<Scalars['String']>;
   /** ID's of labels that were added. */
   addedLabelIds?: Maybe<Array<Scalars['String']>>;
   /** Whether the issue was archived or un-archived. */
   archived?: Maybe<Scalars['Boolean']>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The linked attachment. */
+  attachment?: Maybe<Attachment>;
+  /** The id of linked attachment. */
+  attachmentId?: Maybe<Scalars['String']>;
+  /** Whether the issue was auto-archived. */
   autoArchived?: Maybe<Scalars['Boolean']>;
+  /** Whether the issue was auto-closed. */
   autoClosed?: Maybe<Scalars['Boolean']>;
+  /** [Internal] Serialized JSON representing changes for certain non-relational properties. */
+  changes?: Maybe<Scalars['JSONObject']>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** The user from whom the issue was re-assigned from. */
   fromAssignee?: Maybe<User>;
+  /** The id of user from whom the issue was re-assigned from. */
+  fromAssigneeId?: Maybe<Scalars['String']>;
   /** The previous cycle of the issue. */
   fromCycle?: Maybe<Cycle>;
+  /** The id of previous cycle of the issue. */
+  fromCycleId?: Maybe<Scalars['String']>;
   /** What the due date was changed from */
   fromDueDate?: Maybe<Scalars['TimelessDate']>;
   /** What the estimate was changed from. */
   fromEstimate?: Maybe<Scalars['Float']>;
   /** The previous parent of the issue. */
   fromParent?: Maybe<Issue>;
+  /** The id of previous parent of the issue. */
+  fromParentId?: Maybe<Scalars['String']>;
   /** What the priority was changed from. */
   fromPriority?: Maybe<Scalars['Float']>;
   /** The previous project of the issue. */
   fromProject?: Maybe<Project>;
+  /** The id of previous project of the issue. */
+  fromProjectId?: Maybe<Scalars['String']>;
   /** The previous workflow state of the issue. */
   fromState?: Maybe<WorkflowState>;
+  /** The id of previous workflow state of the issue. */
+  fromStateId?: Maybe<Scalars['String']>;
   /** The team from which the issue was moved from. */
   fromTeam?: Maybe<Team>;
+  /** The id of team from which the issue was moved from. */
+  fromTeamId?: Maybe<Scalars['String']>;
   /** What the title was changed from. */
   fromTitle?: Maybe<Scalars['String']>;
   /** The unique identifier of the entity. */
@@ -2002,33 +2512,48 @@ export type IssueHistory = Node & {
   relationChanges?: Maybe<Array<IssueRelationHistoryPayload>>;
   /** ID's of labels that were removed. */
   removedLabelIds?: Maybe<Array<Scalars['String']>>;
-  /** Information about the integration or application which created this history entry. */
-  source?: Maybe<Scalars['JSONObject']>;
   /** The user to whom the issue was assigned to. */
   toAssignee?: Maybe<User>;
+  /** The id of user to whom the issue was assigned to. */
+  toAssigneeId?: Maybe<Scalars['String']>;
+  /** The new project created from the issue. */
+  toConvertedProject?: Maybe<Project>;
+  /** The id of new project created from the issue. */
+  toConvertedProjectId?: Maybe<Scalars['String']>;
   /** The new cycle of the issue. */
   toCycle?: Maybe<Cycle>;
+  /** The id of new cycle of the issue. */
+  toCycleId?: Maybe<Scalars['String']>;
   /** What the due date was changed to */
   toDueDate?: Maybe<Scalars['TimelessDate']>;
   /** What the estimate was changed to. */
   toEstimate?: Maybe<Scalars['Float']>;
   /** The new parent of the issue. */
   toParent?: Maybe<Issue>;
+  /** The id of new parent of the issue. */
+  toParentId?: Maybe<Scalars['String']>;
   /** What the priority was changed to. */
   toPriority?: Maybe<Scalars['Float']>;
   /** The new project of the issue. */
   toProject?: Maybe<Project>;
+  /** The id of new project of the issue. */
+  toProjectId?: Maybe<Scalars['String']>;
   /** The new workflow state of the issue. */
   toState?: Maybe<WorkflowState>;
+  /** The id of new workflow state of the issue. */
+  toStateId?: Maybe<Scalars['String']>;
   /** The team to which the issue was moved to. */
   toTeam?: Maybe<Team>;
+  /** The id of team to which the issue was moved to. */
+  toTeamId?: Maybe<Scalars['String']>;
   /** What the title was changed to. */
   toTitle?: Maybe<Scalars['String']>;
   /** Whether the issue was trashed or un-trashed. */
   trashed?: Maybe<Scalars['Boolean']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Whether the issue's description was updated. */
@@ -2064,13 +2589,18 @@ export type IssueImport = Node & {
   id: Scalars['ID'];
   /** The data mapping configuration for the import job. */
   mapping?: Maybe<Scalars['JSONObject']>;
+  /** Current step progress in % (0-100). */
+  progress?: Maybe<Scalars['Float']>;
   /** The service from which data will be imported. */
   service: Scalars['String'];
   /** The status for the import job. */
   status: Scalars['String'];
+  /** New team's name in cases when teamId not set */
+  teamName?: Maybe<Scalars['String']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -2115,6 +2645,8 @@ export type IssueLabel = Node & {
   __typename?: 'IssueLabel';
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
+  /** Children of the label. */
+  children: IssueLabelConnection;
   /** The label's color as a HEX string. */
   color: Scalars['String'];
   /** The time at which the entity was created. */
@@ -2130,14 +2662,29 @@ export type IssueLabel = Node & {
   /** The label's name. */
   name: Scalars['String'];
   /** @deprecated Workspace labels are identified by their team being null. */
-  organization?: Maybe<Organization>;
-  /** The team that the label is associated with. If null, the label is associated with the global workspace.. */
+  organization: Organization;
+  /** The parent label. */
+  parent?: Maybe<IssueLabel>;
+  /** The team that the label is associated with. If null, the label is associated with the global workspace. */
   team?: Maybe<Team>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
+};
+
+
+/** Labels that can be associated with issues. */
+export type IssueLabelChildrenArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<IssueLabelFilter>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 
@@ -2152,10 +2699,10 @@ export type IssueLabelIssuesArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** [Alpha] Issue label filtering options. */
+/** Issue label filtering options. */
 export type IssueLabelCollectionFilter = {
   /** Compound filters, all of which need to be matched by the label. */
-  and?: InputMaybe<Array<IssueLabelFilter>>;
+  and?: InputMaybe<Array<IssueLabelCollectionFilter>>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the issue labels creator must satisfy. */
@@ -2164,10 +2711,14 @@ export type IssueLabelCollectionFilter = {
   every?: InputMaybe<IssueLabelFilter>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
   /** Comparator for the name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the label. */
-  or?: InputMaybe<Array<IssueLabelFilter>>;
+  or?: InputMaybe<Array<IssueLabelCollectionFilter>>;
+  /** Filters that the issue label's parent label must satisfy. */
+  parent?: InputMaybe<IssueLabelFilter>;
   /** Filters that needs to be matched by some issue labels. */
   some?: InputMaybe<IssueLabelFilter>;
   /** Filters that the issue labels team must satisfy. */
@@ -2188,12 +2739,12 @@ export type IssueLabelCreateInput = {
   color?: InputMaybe<Scalars['String']>;
   /** The description of the label. */
   description?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The name of the label. */
   name: Scalars['String'];
-  /** [Internal] Whether to replace all team-specific labels with the same name with this newly created workspace label. */
-  replaceTeamLabels?: InputMaybe<Scalars['Boolean']>;
+  /** The identifier of the parent label. */
+  parentId?: InputMaybe<Scalars['String']>;
   /** The team associated with the label. If not given, the label will be associated with the entire workspace. */
   teamId?: InputMaybe<Scalars['String']>;
 };
@@ -2205,7 +2756,7 @@ export type IssueLabelEdge = {
   node: IssueLabel;
 };
 
-/** [Alpha] Issue label filtering options. */
+/** Issue label filtering options. */
 export type IssueLabelFilter = {
   /** Compound filters, all of which need to be matched by the label. */
   and?: InputMaybe<Array<IssueLabelFilter>>;
@@ -2219,6 +2770,8 @@ export type IssueLabelFilter = {
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the label. */
   or?: InputMaybe<Array<IssueLabelFilter>>;
+  /** Filters that the issue label's parent label must satisfy. */
+  parent?: InputMaybe<IssueLabelFilter>;
   /** Filters that the issue labels team must satisfy. */
   team?: InputMaybe<TeamFilter>;
   /** Comparator for the updated at date. */
@@ -2242,6 +2795,50 @@ export type IssueLabelUpdateInput = {
   description?: InputMaybe<Scalars['String']>;
   /** The name of the label. */
   name?: InputMaybe<Scalars['String']>;
+  /** The identifier of the parent label. */
+  parentId?: InputMaybe<Scalars['String']>;
+};
+
+/** An issue related notification */
+export type IssueNotification = Entity & Node & Notification & {
+  __typename?: 'IssueNotification';
+  /** The user that caused the notification. If empty it's Linear itself. */
+  actor?: Maybe<User>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The comment related to the notification. */
+  comment?: Maybe<Comment>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  emailedAt?: Maybe<Scalars['DateTime']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The issue related to the notification. */
+  issue: Issue;
+  /** Name of the reaction emoji related to the notification. */
+  reactionEmoji?: Maybe<Scalars['String']>;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  readAt?: Maybe<Scalars['DateTime']>;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  snoozedUntilAt?: Maybe<Scalars['DateTime']>;
+  /** The team related to the notification. */
+  team: Team;
+  /** Notification type */
+  type: Scalars['String'];
+  /** The time at which a notification was unsnoozed.. */
+  unsnoozedAt?: Maybe<Scalars['DateTime']>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user that received the notification. */
+  user: User;
 };
 
 export type IssuePayload = {
@@ -2278,8 +2875,9 @@ export type IssueRelation = Node & {
   /** The relationship of the issue with the related issue. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -2292,7 +2890,7 @@ export type IssueRelationConnection = {
 };
 
 export type IssueRelationCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The identifier of the issue that is related to another issue. */
   issueId: Scalars['String'];
@@ -2355,8 +2953,6 @@ export type IssueUpdateInput = {
   description?: InputMaybe<Scalars['String']>;
   /** The issue description as a Prosemirror document. */
   descriptionData?: InputMaybe<Scalars['JSON']>;
-  /** [DEPRECATED] Document version for backwards compatibility. */
-  documentVersion?: InputMaybe<Scalars['Int']>;
   /** The date at which the issue is due. */
   dueDate?: InputMaybe<Scalars['TimelessDate']>;
   /** The estimated complexity of the issue. */
@@ -2369,6 +2965,10 @@ export type IssueUpdateInput = {
   priority?: InputMaybe<Scalars['Int']>;
   /** The project associated with the issue. */
   projectId?: InputMaybe<Scalars['String']>;
+  /** [ALPHA] The project milestone associated with the issue. */
+  projectMilestoneId?: InputMaybe<Scalars['String']>;
+  /** [Internal] The timestamp at which an issue will be considered in breach of SLA. */
+  slaBreachesAt?: InputMaybe<Scalars['DateTime']>;
   /** The identifier of the user who snoozed the issue. */
   snoozedById?: InputMaybe<Scalars['String']>;
   /** The time until an issue will be snoozed in Triage view. */
@@ -2457,6 +3057,12 @@ export type JoinOrganizationInput = {
   organizationId: Scalars['String'];
 };
 
+export type LogoutResponse = {
+  __typename?: 'LogoutResponse';
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
 /** A milestone that contains projects. */
 export type Milestone = Node & {
   __typename?: 'Milestone';
@@ -2464,19 +3070,27 @@ export type Milestone = Node & {
   archivedAt?: Maybe<Scalars['DateTime']>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
+  /** [ALPHA] The milestone's description. */
+  description?: Maybe<Scalars['String']>;
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /** The name of the milestone. */
   name: Scalars['String'];
   /** The organization that the milestone belongs to. */
   organization: Organization;
-  /** Projects associated with the milestone. */
+  /**
+   * Projects associated with the milestone.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   projects: ProjectConnection;
   /** The sort order for the milestone. */
   sortOrder: Scalars['Float'];
+  /** [ALPHA] The estimated completion date of the initiative. */
+  targetDate?: Maybe<Scalars['TimelessDate']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -2501,12 +3115,18 @@ export type MilestoneConnection = {
 };
 
 export type MilestoneCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** [ALPHA] The description for the milestone. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The name of the milestone. */
   name: Scalars['String'];
   /** The sort order of the milestone. */
   sortOrder?: InputMaybe<Scalars['Float']>;
+  /** [ALPHA] The planned target date of the milestone. */
+  targetDate?: InputMaybe<Scalars['TimelessDate']>;
+  /** [ALPHA] The identifiers of the teams this milestone is associated with. */
+  teamIds?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export type MilestoneEdge = {
@@ -2516,24 +3136,12 @@ export type MilestoneEdge = {
   node: Milestone;
 };
 
-/** [Alpha] Milestone filtering options. */
-export type MilestoneFilter = {
-  /** Compound filters, all of which need to be matched by the milestone. */
-  and?: InputMaybe<Array<MilestoneFilter>>;
-  /** Comparator for the created at date. */
-  createdAt?: InputMaybe<DateComparator>;
-  /** Comparator for the identifier. */
-  id?: InputMaybe<IdComparator>;
-  /** Comparator for the milestone name. */
-  name?: InputMaybe<StringComparator>;
-  /** Compound filters, one of which need to be matched by the milestone. */
-  or?: InputMaybe<Array<MilestoneFilter>>;
-  /** Filters that the milestones projects must satisfy. */
-  projects?: InputMaybe<ProjectCollectionFilter>;
-  /** Comparator for the milestone sort order. */
-  sortOrder?: InputMaybe<NumberComparator>;
-  /** Comparator for the updated at date. */
-  updatedAt?: InputMaybe<DateComparator>;
+export type MilestoneMigrationPayload = {
+  __typename?: 'MilestoneMigrationPayload';
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
 };
 
 export type MilestonePayload = {
@@ -2547,27 +3155,44 @@ export type MilestonePayload = {
 };
 
 export type MilestoneUpdateInput = {
+  /** [ALPHA] The description for the milestone. */
+  description?: InputMaybe<Scalars['String']>;
   /** The name of the milestone. */
   name?: InputMaybe<Scalars['String']>;
   /** The sort order of the milestone. */
   sortOrder?: InputMaybe<Scalars['Float']>;
+  /** [ALPHA] The planned target date of the milestone. */
+  targetDate?: InputMaybe<Scalars['TimelessDate']>;
+  /** [ALPHA] The identifiers of the teams this milestone is associated with. */
+  teamIds?: InputMaybe<Array<Scalars['String']>>;
+};
+
+export type MilestonesMigrateInput = {
+  /** IDs of the milestones to delete. */
+  milestonesToDelete?: InputMaybe<Array<Scalars['String']>>;
+  /** IDs of the milestones to migrate. */
+  milestonesToMigrate?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /** [Internal] Creates a new API key. */
+  /** Creates an integration api key for Airbyte to connect with Linear */
+  airbyteIntegrationConnect: IntegrationPayload;
+  /** Creates a new API key. */
   apiKeyCreate: ApiKeyPayload;
-  /** [Internal] Deletes an API key. */
+  /** Deletes an API key. */
   apiKeyDelete: ArchivePayload;
   /**
    * [DEPRECATED] Archives an issue attachment.
    * @deprecated This mutation is deprecated, please use `attachmentDelete` instead
    */
   attachmentArchive: ArchivePayload;
-  /** [Alpha] Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
+  /** Creates a new attachment, or updates existing if the same `url` and `issueId` is used. */
   attachmentCreate: AttachmentPayload;
-  /** [Alpha] Deletes an issue attachment. */
+  /** Deletes an issue attachment. */
   attachmentDelete: ArchivePayload;
+  /** Link an existing Discord message to an issue. */
+  attachmentLinkDiscord: AttachmentPayload;
   /** Link an existing Front conversation to an issue. */
   attachmentLinkFront: FrontAttachmentPayload;
   /** Link an existing Intercom conversation to an issue. */
@@ -2578,14 +3203,8 @@ export type Mutation = {
   attachmentLinkURL: AttachmentPayload;
   /** Link an existing Zendesk ticket to an issue. */
   attachmentLinkZendesk: AttachmentPayload;
-  /** [Alpha] Updates an existing issue attachment. */
+  /** Updates an existing issue attachment. */
   attachmentUpdate: AttachmentPayload;
-  /** Updates the billing email address for the customer. */
-  billingEmailUpdate: BillingEmailPayload;
-  /** Creates a call room for an issue or returns an existing call room. */
-  callRoomCreate: CallRoomPayload;
-  /** Update collaborative document with client steps. */
-  collaborativeDocumentUpdate: CollaborationDocumentUpdatePayload;
   /** Creates a new comment. */
   commentCreate: CommentPayload;
   /** Deletes a comment. */
@@ -2594,6 +3213,8 @@ export type Mutation = {
   commentUpdate: CommentPayload;
   /** Saves user message. */
   contactCreate: ContactPayload;
+  /** [INTERNAL] Saves sales pricing inquiry to Front. */
+  contactSalesCreate: ContactPayload;
   /** Create CSV export report for the organization. */
   createCsvExportReport: CreateCsvExportReportPayload;
   /** Creates an organization from onboarding. */
@@ -2610,23 +3231,13 @@ export type Mutation = {
   cycleCreate: CyclePayload;
   /** Updates a cycle. */
   cycleUpdate: CyclePayload;
-  /** [Internal] Create the OAuth test applications in development. */
-  debugCreateOAuthApps: DebugPayload;
-  /** [Internal] Create the SAML test organization in development. */
-  debugCreateSAMLOrg: DebugPayload;
-  /** [Internal] Create test subscription in development. */
-  debugCreateSubscription: DebugPayload;
-  /** Always fails with internal error. Used to debug logging. */
-  debugFailWithInternalError: DebugPayload;
-  /** [Internal] Always logs an error to Sentry as warning. Used to debug logging. */
-  debugFailWithWarning: DebugPayload;
   /** Creates a new document. */
   documentCreate: DocumentPayload;
   /** Deletes a document. */
   documentDelete: ArchivePayload;
   /** Updates a document. */
   documentUpdate: DocumentPayload;
-  /** Subscribes the email to the newsletter. */
+  /** [INTERNAL] Subscribes the email to the newsletter. */
   emailSubscribe: EmailSubscribePayload;
   /** Authenticates a user account via email and authentication token. */
   emailTokenUserAccountAuth: AuthResolverResponse;
@@ -2646,8 +3257,6 @@ export type Mutation = {
   favoriteDelete: ArchivePayload;
   /** Updates a favorite. */
   favoriteUpdate: FavoritePayload;
-  /** Saves user feedback. */
-  feedbackCreate: FeedbackPayload;
   /** XHR request payload to upload an images, video and other attachments directly to Linear's cloud storage. */
   fileUpload: UploadPayload;
   /** Authenticate user account through Google OAuth. This is the 2nd step of OAuth flow. */
@@ -2656,12 +3265,14 @@ export type Mutation = {
   imageUploadFromUrl: ImageUploadFromUrlPayload;
   /** Deletes an integration. */
   integrationDelete: ArchivePayload;
+  /** Integrates the organization with Discord. */
+  integrationDiscord: IntegrationPayload;
   /** Integrates the organization with Figma. */
   integrationFigma: IntegrationPayload;
   /** Integrates the organization with Front. */
   integrationFront: IntegrationPayload;
   /** Generates a webhook for the GitHub commit integration. */
-  integrationGithubCommitCreate: IntegrationPayload;
+  integrationGithubCommitCreate: GitHubCommitIntegrationPayload;
   /** Connects the organization with the GitHub App. */
   integrationGithubConnect: IntegrationPayload;
   /** Connects the organization with a GitLab Access Token. */
@@ -2677,9 +3288,17 @@ export type Mutation = {
    * @deprecated This mutation is deprecated, please use `integrationSettingsUpdate` instead
    */
   integrationIntercomSettingsUpdate: IntegrationPayload;
-  /** Enables Loom integration for the organization. */
+  /**
+   * Enables Loom integration for the organization.
+   * @deprecated Not available.
+   */
   integrationLoom: IntegrationPayload;
-  /** Archives an integration resource. */
+  /** Requests a currently unavailable integration. */
+  integrationRequest: IntegrationRequestPayload;
+  /**
+   * Archives an integration resource.
+   * @deprecated This query will soon be deprecated, please use `attachmentArchive` instead
+   */
   integrationResourceArchive: ArchivePayload;
   /** Integrates the organization with Sentry. */
   integrationSentryConnect: IntegrationPayload;
@@ -2689,14 +3308,24 @@ export type Mutation = {
   integrationSlack: IntegrationPayload;
   /** Imports custom emojis from your Slack workspace. */
   integrationSlackImportEmojis: IntegrationPayload;
+  /** Slack integration for organization level project update notifications. */
+  integrationSlackOrgProjectUpdatesPost: IntegrationPayload;
   /** Integrates your personal notifications with Slack. */
   integrationSlackPersonal: IntegrationPayload;
   /** Slack webhook integration. */
   integrationSlackPost: IntegrationPayload;
   /** Slack integration for project notifications. */
   integrationSlackProjectPost: IntegrationPayload;
+  /** Creates a new integrationTemplate join. */
+  integrationTemplateCreate: IntegrationTemplatePayload;
+  /** Deletes a integrationTemplate. */
+  integrationTemplateDelete: ArchivePayload;
   /** Integrates the organization with Zendesk. */
   integrationZendesk: IntegrationPayload;
+  /** Creates new settings for one or more integrations. */
+  integrationsSettingsCreate: IntegrationsSettingsPayload;
+  /** Updates settings related to integrations for a project or a team. */
+  integrationsSettingsUpdate: IntegrationsSettingsPayload;
   /** Archives an issue. */
   issueArchive: ArchivePayload;
   /** Updates multiple issues at once. */
@@ -2705,9 +3334,17 @@ export type Mutation = {
   issueCreate: IssuePayload;
   /** Deletes (trashes) an issue. */
   issueDelete: ArchivePayload;
+  /** Archives a draft. */
+  issueDraftArchive: ArchivePayload;
+  /** Creates a new draft. */
+  issueDraftCreate: IssueDraftPayload;
+  /** Deletes a draft. */
+  issueDraftDelete: ArchivePayload;
+  /** Updates a draft. */
+  issueDraftUpdate: IssueDraftPayload;
   /** Kicks off an Asana import job. */
   issueImportCreateAsana: IssueImportPayload;
-  /** Kicks off a Clubhouse import job. */
+  /** Kicks off a Shortcut (formerly Clubhouse) import job. */
   issueImportCreateClubhouse: IssueImportPayload;
   /** Kicks off a GitHub import job. */
   issueImportCreateGithub: IssueImportPayload;
@@ -2719,10 +3356,15 @@ export type Mutation = {
   issueImportProcess: IssueImportPayload;
   /** Updates the mapping for the issue import. */
   issueImportUpdate: IssueImportPayload;
-  /** Archives an issue label. */
+  /**
+   * Deletes an issue label.
+   * @deprecated Labels are deleted instead of archived now!
+   */
   issueLabelArchive: ArchivePayload;
   /** Creates a new label. */
   issueLabelCreate: IssueLabelPayload;
+  /** Deletes an issue label. */
+  issueLabelDelete: ArchivePayload;
   /** Updates an label. */
   issueLabelUpdate: IssueLabelPayload;
   /** Creates a new issue relation. */
@@ -2731,6 +3373,8 @@ export type Mutation = {
   issueRelationDelete: ArchivePayload;
   /** Updates an issue relation. */
   issueRelationUpdate: IssueRelationPayload;
+  /** Adds an issue reminder. Will cause a notification to be sent when the issue reminder time is reached. */
+  issueReminder: IssuePayload;
   /** Unarchives an issue. */
   issueUnarchive: ArchivePayload;
   /** Updates an issue. */
@@ -2741,72 +3385,94 @@ export type Mutation = {
   joinOrganizationFromOnboarding: CreateOrJoinOrganizationResponse;
   /** Leave an organization. */
   leaveOrganization: CreateOrJoinOrganizationResponse;
-  /** Creates a new milestone. */
+  /** Logout of all clients. */
+  logout: LogoutResponse;
+  /** Migrates milestones to roadmaps */
+  migrateMilestonesToRoadmaps: MilestoneMigrationPayload;
+  /**
+   * Creates a new milestone.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestoneCreate: MilestonePayload;
-  /** Deletes a milestone. */
+  /**
+   * Deletes a milestone.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestoneDelete: ArchivePayload;
-  /** Updates a milestone. */
+  /**
+   * Updates a milestone.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestoneUpdate: MilestonePayload;
   /** Archives a notification. */
   notificationArchive: ArchivePayload;
-  /** Creates a notification. */
-  notificationCreate: NotificationPayload;
   /** Creates a new notification subscription for a team or a project. */
   notificationSubscriptionCreate: NotificationSubscriptionPayload;
   /** Deletes a notification subscription reference. */
   notificationSubscriptionDelete: ArchivePayload;
+  /** Updates a notification subscription. */
+  notificationSubscriptionUpdate: NotificationSubscriptionPayload;
   /** Unarchives a notification. */
   notificationUnarchive: ArchivePayload;
   /** Updates a notification. */
   notificationUpdate: NotificationPayload;
-  /** [Internal] Authenticates an auth string by the user. */
-  oauthAuthStringAuthorize: OauthAuthStringAuthorizePayload;
-  /** [Internal] Creates a temporary authentication code that can be exchanged for an OAuth token. */
-  oauthAuthStringChallenge: OauthAuthStringChallengePayload;
-  /** [Internal] Returns an access token once the auth string has been authenticated. */
-  oauthAuthStringCheck: OauthAuthStringCheckPayload;
-  /** Archives an OAuth client. */
-  oauthClientArchive: ArchivePayload;
-  /** Creates a new OAuth client. */
-  oauthClientCreate: OauthClientPayload;
-  /** Updates an OAuth client. */
-  oauthClientRotateSecret: RotateSecretPayload;
-  /** Updates an OAuth client. */
-  oauthClientUpdate: OauthClientPayload;
-  /** Revokes an OAuth token. */
-  oauthTokenRevoke: OauthTokenRevokePayload;
   /** Cancels the deletion of an organization. Administrator privileges required. */
   organizationCancelDelete: OrganizationCancelDeletePayload;
   /** Delete's an organization. Administrator privileges required. */
   organizationDelete: OrganizationDeletePayload;
   /** Get an organization's delete confirmation token. Administrator privileges required. */
   organizationDeleteChallenge: OrganizationDeletePayload;
-  /** Adds a domain to be allowed for an organization. */
+  /** [INTERNAL] Verifies a domain claim. */
+  organizationDomainClaim: OrganizationDomainSimplePayload;
+  /** [INTERNAL] Adds a domain to be allowed for an organization. */
   organizationDomainCreate: OrganizationDomainPayload;
   /** Deletes a domain. */
   organizationDomainDelete: ArchivePayload;
-  /** Verifies a domain to be added to an organization. */
+  /** [INTERNAL] Verifies a domain to be added to an organization. */
   organizationDomainVerify: OrganizationDomainPayload;
   /** Creates a new organization invite. */
   organizationInviteCreate: OrganizationInvitePayload;
   /** Deletes an organization invite. */
   organizationInviteDelete: ArchivePayload;
+  /** Updates an organization invite. */
+  organizationInviteUpdate: OrganizationInvitePayload;
   /** Updates the user's organization. */
   organizationUpdate: OrganizationPayload;
-  /** Archives a project. */
+  /**
+   * Archives a project.
+   * @deprecated Deprecated in favor of projectDelete.
+   */
   projectArchive: ArchivePayload;
   /** Creates a new project. */
   projectCreate: ProjectPayload;
+  /** Deletes a project. All issues will be disassociated from the deleted project. */
+  projectDelete: ArchivePayload;
   /** Creates a new project link. */
   projectLinkCreate: ProjectLinkPayload;
   /** Deletes a project link. */
   projectLinkDelete: ArchivePayload;
   /** Updates a project link. */
   projectLinkUpdate: ProjectLinkPayload;
+  /** Creates a new project milestone. */
+  projectMilestoneCreate: ProjectMilestonePayload;
+  /** Deletes a project milestone. */
+  projectMilestoneDelete: ArchivePayload;
+  /** Updates a project milestone. */
+  projectMilestoneUpdate: ProjectMilestonePayload;
   /** Unarchives a project. */
   projectUnarchive: ArchivePayload;
   /** Updates a project. */
   projectUpdate: ProjectPayload;
+  /** Creates a new project update. */
+  projectUpdateCreate: ProjectUpdatePayload;
+  /** Deletes a project update. */
+  projectUpdateDelete: ArchivePayload;
+  /** Creates a new interaction on a project update. */
+  projectUpdateInteractionCreate: ProjectUpdateInteractionPayload;
+  /** Mark a project update as read. */
+  projectUpdateMarkAsRead: ProjectUpdateWithInteractionPayload;
+  /** Updates a project update. */
+  projectUpdateUpdate: ProjectUpdatePayload;
   /** Creates a push subscription. */
   pushSubscriptionCreate: PushSubscriptionPayload;
   /** Deletes a push subscription. */
@@ -2819,20 +3485,24 @@ export type Mutation = {
   refreshGoogleSheetsData: IntegrationPayload;
   /** Re-send an organization invite. */
   resendOrganizationInvite: ArchivePayload;
+  /** Creates a new roadmap. */
+  roadmapCreate: RoadmapPayload;
+  /** Deletes a roadmap. */
+  roadmapDelete: ArchivePayload;
+  /** Creates a new roadmapToProject join. */
+  roadmapToProjectCreate: RoadmapToProjectPayload;
+  /** Deletes a roadmapToProject. */
+  roadmapToProjectDelete: ArchivePayload;
+  /** Updates a roadmapToProject. */
+  roadmapToProjectUpdate: RoadmapToProjectPayload;
+  /** Updates a roadmap. */
+  roadmapUpdate: RoadmapPayload;
   /** Authenticates a user account via email and authentication token for SAML. */
   samlTokenUserAccountAuth: AuthResolverResponse;
-  /** [Internal] Archives a subscription. */
-  subscriptionArchive: ArchivePayload;
-  /** [Internal] Creates a subscription session. Used internally to integrate with Stripe. */
-  subscriptionSessionCreate: SubscriptionSessionPayload;
-  /** [Internal] Updates a subscription. */
-  subscriptionUpdate: SubscriptionPayload;
-  /** [Internal] Creates a subscription update session. Used internally to integrate with Stripe. */
-  subscriptionUpdateSessionCreate: SubscriptionSessionPayload;
-  /** [Internal] Upgrades a subscription plan. */
-  subscriptionUpgrade: SubscriptionPayload;
   /** Creates a new team. The user who creates the team will automatically be added as a member to the newly created team. */
   teamCreate: TeamPayload;
+  /** Deletes team's cycles data */
+  teamCyclesDelete: TeamPayload;
   /** Deletes a team. */
   teamDelete: ArchivePayload;
   /** Deletes a previously used team key. */
@@ -2851,20 +3521,36 @@ export type Mutation = {
   templateDelete: ArchivePayload;
   /** Updates an existing template. */
   templateUpdate: TemplatePayload;
+  /** [INTERNAL] Cancels an ongoing email change for the user account */
+  userAccountEmailChangeCancel: UserAccountEmailVerificationPayload;
+  /** [INTERNAL] Creates an email verification challenge from the app for a user account that wants to change email. */
+  userAccountEmailChangeCreate: UserAccountEmailVerificationPayload;
+  /** [INTERNAL] Verifies the email address and code for a user account that wants to change email. */
+  userAccountEmailChangeVerifyCode: UserAccountEmailChangeVerifyCodePayload;
   /** Makes user a regular user. Can only be called by an admin. */
   userDemoteAdmin: UserAdminPayload;
+  /** Makes user a guest. Can only be called by an admin. */
+  userDemoteMember: UserAdminPayload;
+  /** Connects the Discord user to this Linear account via OAuth2. */
+  userDiscordConnect: UserPayload;
+  /** Disconnects the external user from this Linear account. */
+  userExternalUserDisconnect: UserPayload;
   /** Updates a user's settings flag. */
   userFlagUpdate: UserSettingsFlagPayload;
+  /** Connects the GitHub user to this Linear account via OAuth2. */
+  userGitHubConnect: UserPayload;
+  /** Connects the Google Calendar to the user to this Linear account via OAuth2. */
+  userGoogleCalendarConnect: UserPayload;
   /** Makes user an admin. Can only be called by an admin. */
   userPromoteAdmin: UserAdminPayload;
+  /** Makes user a regular user. Can only be called by an admin. */
+  userPromoteMember: UserAdminPayload;
   /** [Deprecated] Updates a user's settings flag. */
   userSettingsFlagIncrement: UserSettingsFlagPayload;
   /** Resets user's setting flags. */
   userSettingsFlagsReset: UserSettingsFlagsResetPayload;
   /** Updates the user's settings. */
   userSettingsUpdate: UserSettingsPayload;
-  /** Subscribes user to changelog newsletter. */
-  userSubscribeToNewsletter: UserSubscribeToNewsletterPayload;
   /** Suspends a user. Can only be called by an admin. */
   userSuspend: UserAdminPayload;
   /** Un-suspends a user. Can only be called by an admin. */
@@ -2889,6 +3575,11 @@ export type Mutation = {
   workflowStateCreate: WorkflowStatePayload;
   /** Updates a state. */
   workflowStateUpdate: WorkflowStatePayload;
+};
+
+
+export type MutationAirbyteIntegrationConnectArgs = {
+  input: AirbyteConfigurationInput;
 };
 
 
@@ -2917,6 +3608,14 @@ export type MutationAttachmentDeleteArgs = {
 };
 
 
+export type MutationAttachmentLinkDiscordArgs = {
+  channelId: Scalars['String'];
+  issueId: Scalars['String'];
+  messageId: Scalars['String'];
+  url: Scalars['String'];
+};
+
+
 export type MutationAttachmentLinkFrontArgs = {
   conversationId: Scalars['String'];
   issueId: Scalars['String'];
@@ -2936,6 +3635,7 @@ export type MutationAttachmentLinkJiraIssueArgs = {
 
 
 export type MutationAttachmentLinkUrlArgs = {
+  id?: InputMaybe<Scalars['String']>;
   issueId: Scalars['String'];
   title?: InputMaybe<Scalars['String']>;
   url: Scalars['String'];
@@ -2951,21 +3651,6 @@ export type MutationAttachmentLinkZendeskArgs = {
 export type MutationAttachmentUpdateArgs = {
   id: Scalars['String'];
   input: AttachmentUpdateInput;
-};
-
-
-export type MutationBillingEmailUpdateArgs = {
-  input: BillingEmailUpdateInput;
-};
-
-
-export type MutationCallRoomCreateArgs = {
-  input: CallRoomCreateInput;
-};
-
-
-export type MutationCollaborativeDocumentUpdateArgs = {
-  input: CollaborationDocumentUpdateInput;
 };
 
 
@@ -2987,6 +3672,11 @@ export type MutationCommentUpdateArgs = {
 
 export type MutationContactCreateArgs = {
   input: ContactCreateInput;
+};
+
+
+export type MutationContactSalesCreateArgs = {
+  input: ContactSalesCreateInput;
 };
 
 
@@ -3030,11 +3720,6 @@ export type MutationCycleCreateArgs = {
 export type MutationCycleUpdateArgs = {
   id: Scalars['String'];
   input: CycleUpdateInput;
-};
-
-
-export type MutationDebugCreateSubscriptionArgs = {
-  subscriptionType: Scalars['String'];
 };
 
 
@@ -3105,14 +3790,10 @@ export type MutationFavoriteUpdateArgs = {
 };
 
 
-export type MutationFeedbackCreateArgs = {
-  input: FeedbackCreateInput;
-};
-
-
 export type MutationFileUploadArgs = {
   contentType: Scalars['String'];
   filename: Scalars['String'];
+  makePublic?: InputMaybe<Scalars['Boolean']>;
   metaData?: InputMaybe<Scalars['JSON']>;
   size: Scalars['Int'];
 };
@@ -3130,6 +3811,12 @@ export type MutationImageUploadFromUrlArgs = {
 
 export type MutationIntegrationDeleteArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationIntegrationDiscordArgs = {
+  code: Scalars['String'];
+  redirectUri: Scalars['String'];
 };
 
 
@@ -3163,12 +3850,18 @@ export type MutationIntegrationGoogleSheetsArgs = {
 
 export type MutationIntegrationIntercomArgs = {
   code: Scalars['String'];
+  domainUrl?: InputMaybe<Scalars['String']>;
   redirectUri: Scalars['String'];
 };
 
 
 export type MutationIntegrationIntercomSettingsUpdateArgs = {
   input: IntercomSettingsInput;
+};
+
+
+export type MutationIntegrationRequestArgs = {
+  input: IntegrationRequestInput;
 };
 
 
@@ -3203,6 +3896,12 @@ export type MutationIntegrationSlackImportEmojisArgs = {
 };
 
 
+export type MutationIntegrationSlackOrgProjectUpdatesPostArgs = {
+  code: Scalars['String'];
+  redirectUri: Scalars['String'];
+};
+
+
 export type MutationIntegrationSlackPersonalArgs = {
   code: Scalars['String'];
   redirectUri: Scalars['String'];
@@ -3221,6 +3920,17 @@ export type MutationIntegrationSlackProjectPostArgs = {
   code: Scalars['String'];
   projectId: Scalars['String'];
   redirectUri: Scalars['String'];
+  service: Scalars['String'];
+};
+
+
+export type MutationIntegrationTemplateCreateArgs = {
+  input: IntegrationTemplateCreateInput;
+};
+
+
+export type MutationIntegrationTemplateDeleteArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -3229,6 +3939,17 @@ export type MutationIntegrationZendeskArgs = {
   redirectUri: Scalars['String'];
   scope: Scalars['String'];
   subdomain: Scalars['String'];
+};
+
+
+export type MutationIntegrationsSettingsCreateArgs = {
+  input: IntegrationsSettingsCreateInput;
+};
+
+
+export type MutationIntegrationsSettingsUpdateArgs = {
+  id: Scalars['String'];
+  input: IntegrationsSettingsUpdateInput;
 };
 
 
@@ -3254,13 +3975,36 @@ export type MutationIssueDeleteArgs = {
 };
 
 
+export type MutationIssueDraftArchiveArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationIssueDraftCreateArgs = {
+  input: IssueDraftCreateInput;
+};
+
+
+export type MutationIssueDraftDeleteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationIssueDraftUpdateArgs = {
+  id: Scalars['String'];
+  input: IssueDraftUpdateInput;
+};
+
+
 export type MutationIssueImportCreateAsanaArgs = {
   asanaTeamName: Scalars['String'];
   asanaToken: Scalars['String'];
   id?: InputMaybe<Scalars['String']>;
   includeClosedIssues?: InputMaybe<Scalars['Boolean']>;
   instantProcess?: InputMaybe<Scalars['Boolean']>;
-  teamId: Scalars['String'];
+  organizationId?: InputMaybe<Scalars['String']>;
+  teamId?: InputMaybe<Scalars['String']>;
+  teamName?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3270,7 +4014,9 @@ export type MutationIssueImportCreateClubhouseArgs = {
   id?: InputMaybe<Scalars['String']>;
   includeClosedIssues?: InputMaybe<Scalars['Boolean']>;
   instantProcess?: InputMaybe<Scalars['Boolean']>;
-  teamId: Scalars['String'];
+  organizationId?: InputMaybe<Scalars['String']>;
+  teamId?: InputMaybe<Scalars['String']>;
+  teamName?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3282,7 +4028,9 @@ export type MutationIssueImportCreateGithubArgs = {
   id?: InputMaybe<Scalars['String']>;
   includeClosedIssues?: InputMaybe<Scalars['Boolean']>;
   instantProcess?: InputMaybe<Scalars['Boolean']>;
-  teamId: Scalars['String'];
+  organizationId?: InputMaybe<Scalars['String']>;
+  teamId?: InputMaybe<Scalars['String']>;
+  teamName?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3294,7 +4042,9 @@ export type MutationIssueImportCreateJiraArgs = {
   jiraHostname: Scalars['String'];
   jiraProject: Scalars['String'];
   jiraToken: Scalars['String'];
-  teamId: Scalars['String'];
+  organizationId?: InputMaybe<Scalars['String']>;
+  teamId?: InputMaybe<Scalars['String']>;
+  teamName?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3322,6 +4072,12 @@ export type MutationIssueLabelArchiveArgs = {
 
 export type MutationIssueLabelCreateArgs = {
   input: IssueLabelCreateInput;
+  replaceTeamLabels?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type MutationIssueLabelDeleteArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -3344,6 +4100,12 @@ export type MutationIssueRelationDeleteArgs = {
 export type MutationIssueRelationUpdateArgs = {
   id: Scalars['String'];
   input: IssueRelationUpdateInput;
+};
+
+
+export type MutationIssueReminderArgs = {
+  id: Scalars['String'];
+  reminderAt: Scalars['DateTime'];
 };
 
 
@@ -3373,6 +4135,11 @@ export type MutationLeaveOrganizationArgs = {
 };
 
 
+export type MutationMigrateMilestonesToRoadmapsArgs = {
+  input: MilestonesMigrateInput;
+};
+
+
 export type MutationMilestoneCreateArgs = {
   input: MilestoneCreateInput;
 };
@@ -3394,12 +4161,6 @@ export type MutationNotificationArchiveArgs = {
 };
 
 
-export type MutationNotificationCreateArgs = {
-  id: Scalars['String'];
-  input: NotificationUpdateInput;
-};
-
-
 export type MutationNotificationSubscriptionCreateArgs = {
   input: NotificationSubscriptionCreateInput;
 };
@@ -3407,6 +4168,12 @@ export type MutationNotificationSubscriptionCreateArgs = {
 
 export type MutationNotificationSubscriptionDeleteArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationNotificationSubscriptionUpdateArgs = {
+  id: Scalars['String'];
+  input: NotificationSubscriptionUpdateInput;
 };
 
 
@@ -3421,58 +4188,19 @@ export type MutationNotificationUpdateArgs = {
 };
 
 
-export type MutationOauthAuthStringAuthorizeArgs = {
-  appId: Scalars['String'];
-  authString: Scalars['String'];
-};
-
-
-export type MutationOauthAuthStringChallengeArgs = {
-  appId: Scalars['String'];
-  scope: Array<Scalars['String']>;
-};
-
-
-export type MutationOauthAuthStringCheckArgs = {
-  appId: Scalars['String'];
-  authString: Scalars['String'];
-};
-
-
-export type MutationOauthClientArchiveArgs = {
-  id: Scalars['String'];
-};
-
-
-export type MutationOauthClientCreateArgs = {
-  input: OauthClientCreateInput;
-};
-
-
-export type MutationOauthClientRotateSecretArgs = {
-  id: Scalars['String'];
-};
-
-
-export type MutationOauthClientUpdateArgs = {
-  id: Scalars['String'];
-  input: OauthClientUpdateInput;
-};
-
-
-export type MutationOauthTokenRevokeArgs = {
-  appId: Scalars['String'];
-  scope: Array<Scalars['String']>;
-};
-
-
 export type MutationOrganizationDeleteArgs = {
   input: DeleteOrganizationInput;
 };
 
 
+export type MutationOrganizationDomainClaimArgs = {
+  id: Scalars['String'];
+};
+
+
 export type MutationOrganizationDomainCreateArgs = {
   input: OrganizationDomainCreateInput;
+  triggerEmailVerification?: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -3496,6 +4224,12 @@ export type MutationOrganizationInviteDeleteArgs = {
 };
 
 
+export type MutationOrganizationInviteUpdateArgs = {
+  id: Scalars['String'];
+  input: OrganizationInviteUpdateInput;
+};
+
+
 export type MutationOrganizationUpdateArgs = {
   input: UpdateOrganizationInput;
 };
@@ -3508,6 +4242,11 @@ export type MutationProjectArchiveArgs = {
 
 export type MutationProjectCreateArgs = {
   input: ProjectCreateInput;
+};
+
+
+export type MutationProjectDeleteArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -3527,6 +4266,22 @@ export type MutationProjectLinkUpdateArgs = {
 };
 
 
+export type MutationProjectMilestoneCreateArgs = {
+  input: ProjectMilestoneCreateInput;
+};
+
+
+export type MutationProjectMilestoneDeleteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationProjectMilestoneUpdateArgs = {
+  id: Scalars['String'];
+  input: ProjectMilestoneUpdateInput;
+};
+
+
 export type MutationProjectUnarchiveArgs = {
   id: Scalars['String'];
 };
@@ -3535,6 +4290,32 @@ export type MutationProjectUnarchiveArgs = {
 export type MutationProjectUpdateArgs = {
   id: Scalars['String'];
   input: ProjectUpdateInput;
+};
+
+
+export type MutationProjectUpdateCreateArgs = {
+  input: ProjectUpdateCreateInput;
+};
+
+
+export type MutationProjectUpdateDeleteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationProjectUpdateInteractionCreateArgs = {
+  input: ProjectUpdateInteractionCreateInput;
+};
+
+
+export type MutationProjectUpdateMarkAsReadArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationProjectUpdateUpdateArgs = {
+  id: Scalars['String'];
+  input: ProjectUpdateUpdateInput;
 };
 
 
@@ -3568,37 +4349,51 @@ export type MutationResendOrganizationInviteArgs = {
 };
 
 
+export type MutationRoadmapCreateArgs = {
+  input: RoadmapCreateInput;
+};
+
+
+export type MutationRoadmapDeleteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationRoadmapToProjectCreateArgs = {
+  input: RoadmapToProjectCreateInput;
+};
+
+
+export type MutationRoadmapToProjectDeleteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationRoadmapToProjectUpdateArgs = {
+  id: Scalars['String'];
+  input: RoadmapToProjectUpdateInput;
+};
+
+
+export type MutationRoadmapUpdateArgs = {
+  id: Scalars['String'];
+  input: RoadmapUpdateInput;
+};
+
+
 export type MutationSamlTokenUserAccountAuthArgs = {
   input: TokenUserAccountAuthInput;
-};
-
-
-export type MutationSubscriptionArchiveArgs = {
-  id: Scalars['String'];
-};
-
-
-export type MutationSubscriptionSessionCreateArgs = {
-  coupon?: InputMaybe<Scalars['String']>;
-  plan: Scalars['String'];
-};
-
-
-export type MutationSubscriptionUpdateArgs = {
-  id: Scalars['String'];
-  input: SubscriptionUpdateInput;
-};
-
-
-export type MutationSubscriptionUpgradeArgs = {
-  id: Scalars['String'];
-  type: Scalars['String'];
 };
 
 
 export type MutationTeamCreateArgs = {
   copySettingsFromTeamId?: InputMaybe<Scalars['String']>;
   input: TeamCreateInput;
+};
+
+
+export type MutationTeamCyclesDeleteArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -3650,8 +4445,42 @@ export type MutationTemplateUpdateArgs = {
 };
 
 
+export type MutationUserAccountEmailChangeCancelArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationUserAccountEmailChangeCreateArgs = {
+  hasExistingAccount: Scalars['Boolean'];
+  id: Scalars['String'];
+  newEmail: Scalars['String'];
+};
+
+
+export type MutationUserAccountEmailChangeVerifyCodeArgs = {
+  code: Scalars['String'];
+  email: Scalars['String'];
+};
+
+
 export type MutationUserDemoteAdminArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationUserDemoteMemberArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationUserDiscordConnectArgs = {
+  code: Scalars['String'];
+  redirectUri: Scalars['String'];
+};
+
+
+export type MutationUserExternalUserDisconnectArgs = {
+  service: Scalars['String'];
 };
 
 
@@ -3661,13 +4490,33 @@ export type MutationUserFlagUpdateArgs = {
 };
 
 
+export type MutationUserGitHubConnectArgs = {
+  code: Scalars['String'];
+};
+
+
+export type MutationUserGoogleCalendarConnectArgs = {
+  code: Scalars['String'];
+};
+
+
 export type MutationUserPromoteAdminArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationUserPromoteMemberArgs = {
   id: Scalars['String'];
 };
 
 
 export type MutationUserSettingsFlagIncrementArgs = {
   flag: Scalars['String'];
+};
+
+
+export type MutationUserSettingsFlagsResetArgs = {
+  flags?: InputMaybe<Array<UserFlagType>>;
 };
 
 
@@ -3740,50 +4589,17 @@ export type MutationWorkflowStateUpdateArgs = {
   input: WorkflowStateUpdateInput;
 };
 
-/** Comparator for strings. */
-export type NestedStringComparator = {
-  /** Contains constraint. Matches any values that contain the given string. */
-  contains?: InputMaybe<Scalars['String']>;
-  /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
-  containsIgnoreCase?: InputMaybe<Scalars['String']>;
-  /** Ends with constraint. Matches any values that end with the given string. */
-  endsWith?: InputMaybe<Scalars['String']>;
-  /** Equals constraint. */
-  eq?: InputMaybe<Scalars['String']>;
-  /** Equals case insensitive. Matches any values that matches the given string case insensitive. */
-  eqIgnoreCase?: InputMaybe<Scalars['String']>;
-  /** In-array constraint. */
-  in?: InputMaybe<Array<Scalars['String']>>;
-  /** Not-equals constraint. */
-  neq?: InputMaybe<Scalars['String']>;
-  /** Not-equals case insensitive. Matches any values that don't match the given string case insensitive. */
-  neqIgnoreCase?: InputMaybe<Scalars['String']>;
-  /** Not-in-array constraint. */
-  nin?: InputMaybe<Array<Scalars['String']>>;
-  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
-  notContains?: InputMaybe<Scalars['String']>;
-  /** Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive. */
-  notContainsIgnoreCase?: InputMaybe<Scalars['String']>;
-  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
-  notEndsWith?: InputMaybe<Scalars['String']>;
-  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
-  notStartsWith?: InputMaybe<Scalars['String']>;
-  /** Starts with constraint. Matches any values that start with the given string. */
-  startsWith?: InputMaybe<Scalars['String']>;
-};
-
 export type Node = {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
 };
 
 /** A notification sent to a user. */
-export type Notification = Node & {
-  __typename?: 'Notification';
+export type Notification = {
+  /** The user that caused the notification. If empty it's Linear itself. */
+  actor?: Maybe<User>;
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
-  /** The comment which the notification is associated with. */
-  comment?: Maybe<Comment>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /**
@@ -3793,24 +4609,21 @@ export type Notification = Node & {
   emailedAt?: Maybe<Scalars['DateTime']>;
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
-  /** The issue that the notification is associated with. */
-  issue: Issue;
-  /** Name of the reaction emoji associated with the notification. */
-  reactionEmoji?: Maybe<Scalars['String']>;
   /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
   readAt?: Maybe<Scalars['DateTime']>;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
   snoozedUntilAt?: Maybe<Scalars['DateTime']>;
-  /** The team which the notification is associated with. */
-  team: Team;
   /** Notification type */
   type: Scalars['String'];
+  /** The time at which a notification was unsnoozed.. */
+  unsnoozedAt?: Maybe<Scalars['DateTime']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
-  /** The recipient of the notification. */
+  /** The user that received the notification. */
   user: User;
 };
 
@@ -3839,8 +4652,7 @@ export type NotificationPayload = {
 };
 
 /** Notification subscriptions for models. */
-export type NotificationSubscription = Node & {
-  __typename?: 'NotificationSubscription';
+export type NotificationSubscription = {
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
   /** The time at which the entity was created. */
@@ -3854,8 +4666,9 @@ export type NotificationSubscription = Node & {
   /** The type of the subscription. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The user associated with notification subscriptions. */
@@ -3870,12 +4683,16 @@ export type NotificationSubscriptionConnection = {
 };
 
 export type NotificationSubscriptionCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The identifier of the project to subscribe to. */
   projectId?: InputMaybe<Scalars['String']>;
+  /** The type of the project subscription. */
+  projectNotificationSubscriptionType?: InputMaybe<ProjectNotificationSubscriptionType>;
   /** The identifier of the team to subscribe to. */
   teamId?: InputMaybe<Scalars['String']>;
+  /** The types of notifications of the team subscription. */
+  teamNotificationSubscriptionTypes?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export type NotificationSubscriptionEdge = {
@@ -3895,17 +4712,26 @@ export type NotificationSubscriptionPayload = {
   success: Scalars['Boolean'];
 };
 
+export type NotificationSubscriptionUpdateInput = {
+  /** The type of the project subscription. */
+  projectNotificationSubscriptionType?: InputMaybe<ProjectNotificationSubscriptionType>;
+  /** The types of notifications of the team subscription. */
+  teamNotificationSubscriptionTypes?: InputMaybe<Array<Scalars['String']>>;
+};
+
 export type NotificationUpdateInput = {
+  /** The id of the project update related to the notification. */
+  projectUpdateId?: InputMaybe<Scalars['String']>;
   /** The time when notification was marked as read. */
   readAt?: InputMaybe<Scalars['DateTime']>;
   /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
   snoozedUntilAt?: InputMaybe<Scalars['DateTime']>;
 };
 
-/** [Alpha] Cycle filtering options. */
+/** Cycle filtering options. */
 export type NullableCycleFilter = {
-  /** Compound filters, all of which need to be matched by the cycle. */
-  and?: InputMaybe<Array<CycleFilter>>;
+  /** Compound filters, one of which need to be matched by the cycle. */
+  and?: InputMaybe<Array<NullableCycleFilter>>;
   /** Comparator for the cycle completed at date. */
   completedAt?: InputMaybe<DateComparator>;
   /** Comparator for the created at date. */
@@ -3914,6 +4740,16 @@ export type NullableCycleFilter = {
   endsAt?: InputMaybe<DateComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
+  /** Comparator for the filtering active cycle. */
+  isActive?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering future cycles. */
+  isFuture?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering next cycle. */
+  isNext?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering past cycles. */
+  isPast?: InputMaybe<BooleanComparator>;
+  /** Comparator for the filtering previous cycle. */
+  isPrevious?: InputMaybe<BooleanComparator>;
   /** Filters that the cycles issues must satisfy. */
   issues?: InputMaybe<IssueCollectionFilter>;
   /** Comparator for the cycle name. */
@@ -3923,7 +4759,7 @@ export type NullableCycleFilter = {
   /** Comparator for the cycle number. */
   number?: InputMaybe<NumberComparator>;
   /** Compound filters, one of which need to be matched by the cycle. */
-  or?: InputMaybe<Array<CycleFilter>>;
+  or?: InputMaybe<Array<NullableCycleFilter>>;
   /** Comparator for the cycle start date. */
   startsAt?: InputMaybe<DateComparator>;
   /** Filters that the cycles team must satisfy. */
@@ -3954,24 +4790,78 @@ export type NullableDateComparator = {
   null?: InputMaybe<Scalars['Boolean']>;
 };
 
-/** [Alpha] User filtering options. */
-export type NullableMilestoneFilter = {
-  /** Compound filters, all of which need to be matched by the milestone. */
-  and?: InputMaybe<Array<MilestoneFilter>>;
+/** Issue filtering options. */
+export type NullableIssueFilter = {
+  /** Compound filters, all of which need to be matched by the issue. */
+  and?: InputMaybe<Array<NullableIssueFilter>>;
+  /** Filters that the issues assignee must satisfy. */
+  assignee?: InputMaybe<NullableUserFilter>;
+  /** Filters that the issues attachments must satisfy. */
+  attachments?: InputMaybe<AttachmentCollectionFilter>;
+  /** Comparator for the issues auto archived at date. */
+  autoArchivedAt?: InputMaybe<NullableDateComparator>;
+  /** Comparator for the issues auto closed at date. */
+  autoClosedAt?: InputMaybe<NullableDateComparator>;
+  /** Comparator for the issues canceled at date. */
+  canceledAt?: InputMaybe<NullableDateComparator>;
+  /** Filters that the child issues must satisfy. */
+  children?: InputMaybe<IssueCollectionFilter>;
+  /** Filters that the issues comments must satisfy. */
+  comments?: InputMaybe<CommentCollectionFilter>;
+  /** Comparator for the issues completed at date. */
+  completedAt?: InputMaybe<NullableDateComparator>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the issues creator must satisfy. */
+  creator?: InputMaybe<NullableUserFilter>;
+  /** Filters that the issues cycle must satisfy. */
+  cycle?: InputMaybe<NullableCycleFilter>;
+  /** Comparator for the issues description. */
+  description?: InputMaybe<NullableStringComparator>;
+  /** Comparator for the issues due date. */
+  dueDate?: InputMaybe<NullableTimelessDateComparator>;
+  /** Comparator for the issues estimate. */
+  estimate?: InputMaybe<EstimateComparator>;
+  /** Comparator for filtering issues which are blocked. */
+  hasBlockedByRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are blocking. */
+  hasBlockingRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues which are duplicates. */
+  hasDuplicateRelations?: InputMaybe<RelationExistsComparator>;
+  /** Comparator for filtering issues with relations. */
+  hasRelatedRelations?: InputMaybe<RelationExistsComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
-  /** Comparator for the milestone name. */
-  name?: InputMaybe<StringComparator>;
+  /** Filters that issue labels must satisfy. */
+  labels?: InputMaybe<IssueLabelCollectionFilter>;
   /** Filter based on the existence of the relation. */
   null?: InputMaybe<Scalars['Boolean']>;
-  /** Compound filters, one of which need to be matched by the milestone. */
-  or?: InputMaybe<Array<MilestoneFilter>>;
-  /** Filters that the milestones projects must satisfy. */
-  projects?: InputMaybe<ProjectCollectionFilter>;
-  /** Comparator for the milestone sort order. */
-  sortOrder?: InputMaybe<NumberComparator>;
+  /** Comparator for the issues number. */
+  number?: InputMaybe<NumberComparator>;
+  /** Compound filters, one of which need to be matched by the issue. */
+  or?: InputMaybe<Array<NullableIssueFilter>>;
+  /** Filters that the issue parent must satisfy. */
+  parent?: InputMaybe<NullableIssueFilter>;
+  /** Comparator for the issues priority. */
+  priority?: InputMaybe<NullableNumberComparator>;
+  /** Filters that the issues project must satisfy. */
+  project?: InputMaybe<NullableProjectFilter>;
+  /** [Internal] Comparator for the issues content. */
+  searchableContent?: InputMaybe<ContentComparator>;
+  /** Filters that the issues snoozer must satisfy. */
+  snoozedBy?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the issues snoozed until date. */
+  snoozedUntilAt?: InputMaybe<NullableDateComparator>;
+  /** Comparator for the issues started at date. */
+  startedAt?: InputMaybe<NullableDateComparator>;
+  /** Filters that the issues state must satisfy. */
+  state?: InputMaybe<WorkflowStateFilter>;
+  /** Filters that issue subscribers must satisfy. */
+  subscribers?: InputMaybe<UserCollectionFilter>;
+  /** Filters that the issues team must satisfy. */
+  team?: InputMaybe<TeamFilter>;
+  /** Comparator for the issues title. */
+  title?: InputMaybe<StringComparator>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -3998,10 +4888,10 @@ export type NullableNumberComparator = {
   null?: InputMaybe<Scalars['Boolean']>;
 };
 
-/** [Alpha] Project filtering options. */
+/** Project filtering options. */
 export type NullableProjectFilter = {
   /** Compound filters, all of which need to be matched by the project. */
-  and?: InputMaybe<Array<ProjectFilter>>;
+  and?: InputMaybe<Array<NullableProjectFilter>>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
@@ -4014,14 +4904,16 @@ export type NullableProjectFilter = {
   lead?: InputMaybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
   members?: InputMaybe<UserFilter>;
-  /** Filters that the projects milestones must satisfy. */
-  milestone?: InputMaybe<NullableMilestoneFilter>;
   /** Comparator for the project name. */
   name?: InputMaybe<StringComparator>;
   /** Filter based on the existence of the relation. */
   null?: InputMaybe<Scalars['Boolean']>;
   /** Compound filters, one of which need to be matched by the project. */
-  or?: InputMaybe<Array<ProjectFilter>>;
+  or?: InputMaybe<Array<NullableProjectFilter>>;
+  /** Filters that the projects roadmaps must satisfy. */
+  roadmaps?: InputMaybe<RoadmapCollectionFilter>;
+  /** Comparator for the project slug ID. */
+  slugId?: InputMaybe<StringComparator>;
   /** Comparator for the project start date. */
   startDate?: InputMaybe<NullableDateComparator>;
   /** Comparator for the project state. */
@@ -4087,26 +4979,32 @@ export type NullableTimelessDateComparator = {
   null?: InputMaybe<Scalars['Boolean']>;
 };
 
-/** [Alpha] User filtering options. */
+/** User filtering options. */
 export type NullableUserFilter = {
+  /** Comparator for the user's activity status. */
+  active?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's admin status. */
+  admin?: InputMaybe<BooleanComparator>;
   /** Compound filters, all of which need to be matched by the user. */
-  and?: InputMaybe<Array<UserFilter>>;
+  and?: InputMaybe<Array<NullableUserFilter>>;
   /** Filters that the users assigned issues must satisfy. */
   assignedIssues?: InputMaybe<IssueCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
-  /** Comparator for the users display name. */
+  /** Comparator for the user's display name. */
   displayName?: InputMaybe<StringComparator>;
-  /** Comparator for the users email. */
+  /** Comparator for the user's email. */
   email?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
-  /** Comparator for the users name. */
+  /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
+  isMe?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's name. */
   name?: InputMaybe<StringComparator>;
   /** Filter based on the existence of the relation. */
   null?: InputMaybe<Scalars['Boolean']>;
   /** Compound filters, one of which need to be matched by the user. */
-  or?: InputMaybe<Array<UserFilter>>;
+  or?: InputMaybe<Array<NullableUserFilter>>;
   /** Comparator for the updated at date. */
   updatedAt?: InputMaybe<DateComparator>;
 };
@@ -4131,27 +5029,12 @@ export type NumberComparator = {
   nin?: InputMaybe<Array<Scalars['Float']>>;
 };
 
-export type OauthAuthStringAuthorizePayload = {
-  __typename?: 'OauthAuthStringAuthorizePayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type OauthAuthStringChallengePayload = {
-  __typename?: 'OauthAuthStringChallengePayload';
-  /** The created authentication string. */
-  authString: Scalars['String'];
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type OauthAuthStringCheckPayload = {
-  __typename?: 'OauthAuthStringCheckPayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-  /** Access token for use. */
-  token?: Maybe<Scalars['String']>;
-};
+/** The different requests statuses possible for an OAuth client approval request */
+export enum OAuthClientApprovalStatus {
+  Approved = 'approved',
+  Denied = 'denied',
+  Requested = 'requested'
+}
 
 /** OAuth2 client application */
 export type OauthClient = Node & {
@@ -4164,8 +5047,10 @@ export type OauthClient = Node & {
   clientSecret: Scalars['String'];
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
+  /** The user who created the OAuthClient. */
+  creator: User;
   /** Information about the application. */
-  description: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   /** Name of the developer. */
   developer: Scalars['String'];
   /** Url of the developer. */
@@ -4173,16 +5058,19 @@ export type OauthClient = Node & {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /** Image of the application. */
-  imageUrl: Scalars['String'];
+  imageUrl?: Maybe<Scalars['String']>;
   /** OAuth application's client name. */
   name: Scalars['String'];
+  /** The organization that the OAuthClient is associated with. */
+  organization: Organization;
   /** Whether the OAuth application is publicly visible, or only visible to the creating workspace. */
   publicEnabled: Scalars['Boolean'];
   /** List of allowed redirect URIs for the application. */
   redirectUris: Array<Scalars['String']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The resource types to request when creating new webhooks. */
@@ -4191,64 +5079,71 @@ export type OauthClient = Node & {
   webhookUrl?: Maybe<Scalars['String']>;
 };
 
-export type OauthClientCreateInput = {
-  /** User facing description of the application. */
-  description?: InputMaybe<Scalars['String']>;
-  /** Name of the developer of the application. */
-  developer: Scalars['String'];
-  /** Url of the developer (homepage or docs). */
-  developerUrl: Scalars['String'];
-  /** The identifier. If none is provided, the backend will generate one. */
-  id?: InputMaybe<Scalars['String']>;
-  /** URL for the app icon. */
-  imageUrl?: InputMaybe<Scalars['String']>;
-  /** The application's name. */
-  name: Scalars['String'];
-  /** Whether the OAuth application should be publicly visible, or only visible to the creating workspace. */
-  publicEnabled?: InputMaybe<Scalars['Boolean']>;
-  /** List of allowed redirect URIs for the application. */
-  redirectUris: Array<Scalars['String']>;
-  /** List of resources the webhooks should subscribe to. */
-  webhookResourceTypes: Array<Scalars['String']>;
-  /** The URL that will be called on data changes. */
-  webhookUrl?: InputMaybe<Scalars['String']>;
+/** Request to install OAuth clients on organizations and the response to the request. */
+export type OauthClientApproval = Node & {
+  __typename?: 'OauthClientApproval';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The reason the request for the OAuth client approval was denied. */
+  denyReason?: Maybe<Scalars['String']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The uuid of the OAuth client being requested for installation. */
+  oauthClientId: Scalars['String'];
+  /** The reason the person wants to install this OAuth client. */
+  requestReason?: Maybe<Scalars['String']>;
+  /** The person who requested installing the OAuth client. */
+  requesterId: Scalars['String'];
+  /** The person who responded to the request to install the OAuth client. */
+  responderId?: Maybe<Scalars['String']>;
+  /** The scopes the app has requested. */
+  scopes: Array<Scalars['String']>;
+  /** The status for the OAuth client approval request. */
+  status: OAuthClientApprovalStatus;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
 };
 
-export type OauthClientPayload = {
-  __typename?: 'OauthClientPayload';
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars['Float'];
-  /** The OAuth client application that was created or updated. */
-  oauthClient: OauthClient;
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type OauthClientUpdateInput = {
-  /** User facing description of the application. */
-  description?: InputMaybe<Scalars['String']>;
-  /** Name of the developer of the application. */
-  developer?: InputMaybe<Scalars['String']>;
-  /** URL of the developer (homepage or docs). */
-  developerUrl?: InputMaybe<Scalars['String']>;
-  /** URL for the app icon. */
-  imageUrl?: InputMaybe<Scalars['String']>;
-  /** The application's name. */
-  name?: InputMaybe<Scalars['String']>;
-  /** Whether the OAuth application should be publicly visible, or only visible to the creating workspace. */
-  publicEnabled?: InputMaybe<Scalars['Boolean']>;
-  /** List of allowed redirect URIs for the application. */
-  redirectUris?: InputMaybe<Array<Scalars['String']>>;
-  /** List of resources the webhooks should subscribe to. */
-  webhookResourceTypes?: InputMaybe<Array<Scalars['String']>>;
-  /** The URL that will be called on data changes. */
-  webhookUrl?: InputMaybe<Scalars['String']>;
-};
-
-export type OauthTokenRevokePayload = {
-  __typename?: 'OauthTokenRevokePayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
+/** An oauth client approval related notification */
+export type OauthClientApprovalNotification = Entity & Node & Notification & {
+  __typename?: 'OauthClientApprovalNotification';
+  /** The user that caused the notification. If empty it's Linear itself. */
+  actor?: Maybe<User>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  emailedAt?: Maybe<Scalars['DateTime']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The OAuth client approval request related to the notification. */
+  oauthClientApproval: OauthClientApproval;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  readAt?: Maybe<Scalars['DateTime']>;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  snoozedUntilAt?: Maybe<Scalars['DateTime']>;
+  /** Notification type */
+  type: Scalars['String'];
+  /** The time at which a notification was unsnoozed.. */
+  unsnoozedAt?: Maybe<Scalars['DateTime']>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user that received the notification. */
+  user: User;
 };
 
 export type OnboardingCustomerSurvey = {
@@ -4283,25 +5178,34 @@ export type Organization = Node & {
   labels: IssueLabelConnection;
   /** The organization's logo URL. */
   logoUrl?: Maybe<Scalars['String']>;
-  /** Milestones associated with the organization. */
-  milestones: MilestoneConnection;
   /** The organization's name. */
   name: Scalars['String'];
   /** Rolling 30-day total upload volume for the organization, in megabytes. */
   periodUploadVolume: Scalars['Float'];
+  /** Previously used URL keys for the organization (last 3 are kept and redirected). */
+  previousUrlKeys: Array<Scalars['String']>;
+  /** The day at which to prompt for project updates. */
+  projectUpdateRemindersDay: Day;
+  /** The hour at which to prompt for project updates. */
+  projectUpdateRemindersHour: Scalars['Float'];
+  /** The frequency at which to prompt for project updates. */
+  projectUpdatesReminderFrequency: ProjectUpdateReminderFrequency;
   /** Whether the organization is using a roadmap. */
   roadmapEnabled: Scalars['Boolean'];
   /** Whether SAML authentication is enabled for organization. */
   samlEnabled: Scalars['Boolean'];
+  /** Whether SCIM provisioning is enabled for organization. */
+  scimEnabled: Scalars['Boolean'];
   /** The organization's subscription to a paid plan. */
-  subscription?: Maybe<Subscription>;
+  subscription?: Maybe<PaidSubscription>;
   /** Teams associated with the organization. */
   teams: TeamConnection;
   /** Templates associated with the organization. */
   templates: TemplateConnection;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The organization's unique URL key. */
@@ -4329,18 +5233,6 @@ export type OrganizationLabelsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
   filter?: InputMaybe<IssueLabelFilter>;
-  first?: InputMaybe<Scalars['Int']>;
-  includeArchived?: InputMaybe<Scalars['Boolean']>;
-  last?: InputMaybe<Scalars['Int']>;
-  orderBy?: InputMaybe<PaginationOrderBy>;
-};
-
-
-/** An organization. Organizations are root-level objects that contain user accounts and teams. */
-export type OrganizationMilestonesArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<MilestoneFilter>;
   first?: InputMaybe<Scalars['Int']>;
   includeArchived?: InputMaybe<Scalars['Boolean']>;
   last?: InputMaybe<Scalars['Int']>;
@@ -4399,6 +5291,10 @@ export type OrganizationDomain = Node & {
   __typename?: 'OrganizationDomain';
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
+  /** What type of auth is the domain used for */
+  authType: OrganizationDomainAuthType;
+  /** Whether the domains was claimed by the organization through DNS verification. */
+  claimed?: Maybe<Scalars['Boolean']>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** The user who added the domain. */
@@ -4408,8 +5304,9 @@ export type OrganizationDomain = Node & {
   /** Domain name */
   name: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** E-mail used to verify this domain */
@@ -4418,15 +5315,31 @@ export type OrganizationDomain = Node & {
   verified: Scalars['Boolean'];
 };
 
+/** What type of auth is the domain used for. */
+export enum OrganizationDomainAuthType {
+  General = 'general',
+  Saml = 'saml'
+}
+
+/** [INTERNAL] Domain claim request response. */
+export type OrganizationDomainClaimPayload = {
+  __typename?: 'OrganizationDomainClaimPayload';
+  /** String to put into DNS for verification. */
+  verificationString: Scalars['String'];
+};
+
 export type OrganizationDomainCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The authentication type this domain is for. */
+  authType?: InputMaybe<Scalars['String']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The domain name to add. */
   name: Scalars['String'];
   /** The email address to which to send the verification code. */
-  verificationEmail: Scalars['String'];
+  verificationEmail?: InputMaybe<Scalars['String']>;
 };
 
+/** [INTERNAL] Organization domain operation response. */
 export type OrganizationDomainPayload = {
   __typename?: 'OrganizationDomainPayload';
   /** The identifier of the last sync operation. */
@@ -4437,6 +5350,7 @@ export type OrganizationDomainPayload = {
   success: Scalars['Boolean'];
 };
 
+/** [INTERNAL] Organization domain operation response. */
 export type OrganizationDomainSimplePayload = {
   __typename?: 'OrganizationDomainSimplePayload';
   /** Whether the operation was successful. */
@@ -4444,7 +5358,7 @@ export type OrganizationDomainSimplePayload = {
 };
 
 export type OrganizationDomainVerificationInput = {
-  /** The identifier of the domain being verified. */
+  /** The identifier in UUID v4 format of the domain being verified. */
   organizationDomainId: Scalars['String'];
   /** The verification code sent via email. */
   verificationCode: Scalars['String'];
@@ -4481,9 +5395,12 @@ export type OrganizationInvite = Node & {
   inviter: User;
   /** The organization that the invite is associated with. */
   organization: Organization;
+  /** The user role that the invitee will receive upon accepting the invite. */
+  role: UserRoleType;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -4498,10 +5415,12 @@ export type OrganizationInviteConnection = {
 export type OrganizationInviteCreateInput = {
   /** The email of the invitee. */
   email: Scalars['String'];
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The message to send to the invitee. */
   message?: InputMaybe<Scalars['String']>;
+  /** What user role the invite should grant. */
+  role?: InputMaybe<UserRoleType>;
   /** The teams that the user has been invited to. */
   teamIds?: InputMaybe<Array<Scalars['String']>>;
 };
@@ -4524,6 +5443,8 @@ export type OrganizationInviteDetailsPayload = {
   organizationLogoUrl?: Maybe<Scalars['String']>;
   /** Name of the workspace the invite is for. */
   organizationName: Scalars['String'];
+  /** What user role the invite should grant. */
+  role: UserRoleType;
 };
 
 export type OrganizationInviteEdge = {
@@ -4541,6 +5462,11 @@ export type OrganizationInvitePayload = {
   organizationInvite: OrganizationInvite;
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
+};
+
+export type OrganizationInviteUpdateInput = {
+  /** The teams that the user has been invited to. */
+  teamIds: Array<Scalars['String']>;
 };
 
 export type OrganizationPayload = {
@@ -4571,6 +5497,62 @@ export enum PaginationOrderBy {
   UpdatedAt = 'updatedAt'
 }
 
+/** The paid subscription of an organization. */
+export type PaidSubscription = Node & {
+  __typename?: 'PaidSubscription';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The date the subscription was canceled, if any. */
+  canceledAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The creator of the subscription. */
+  creator?: Maybe<User>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The date the subscription will be billed next. */
+  nextBillingAt?: Maybe<Scalars['DateTime']>;
+  /** The organization that the subscription is associated with. */
+  organization: Organization;
+  /** The subscription type of a pending change. Null if no change pending. */
+  pendingChangeType?: Maybe<Scalars['String']>;
+  /** The number of seats in the subscription. */
+  seats: Scalars['Float'];
+  /** The maximum number of seats that can be added to the subscription. */
+  seatsMaximum?: Maybe<Scalars['Float']>;
+  /** The minimum number of seats that will be billed in the subscription. */
+  seatsMinimum?: Maybe<Scalars['Float']>;
+  /** The subscription type. */
+  type: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+/** A personal note for a user */
+export type PersonalNote = Node & {
+  __typename?: 'PersonalNote';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The note content as JSON. */
+  contentData?: Maybe<Scalars['JSONObject']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user that owns the note. */
+  user: User;
+};
+
 /** A project. */
 export type Project = Node & {
   __typename?: 'Project';
@@ -4588,6 +5570,8 @@ export type Project = Node & {
   completedIssueCountHistory: Array<Scalars['Float']>;
   /** The number of completed estimation points after each week. */
   completedScopeHistory: Array<Scalars['Float']>;
+  /** The project was created based on this issue. */
+  convertedFromIssue?: Maybe<Issue>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** The user who created the project. */
@@ -4600,6 +5584,12 @@ export type Project = Node & {
   icon?: Maybe<Scalars['String']>;
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
+  /** The number of in progress estimation points after each week. */
+  inProgressScopeHistory: Array<Scalars['Float']>;
+  /** The initiative that this project is associated with. */
+  initiative?: Maybe<Initiative>;
+  /** Settings for all integrations associated with that project. */
+  integrationsSettings?: Maybe<IntegrationsSettings>;
   /** The total number of issues in the project after each week. */
   issueCountHistory: Array<Scalars['Float']>;
   /** Issues associated with the project. */
@@ -4610,12 +5600,23 @@ export type Project = Node & {
   links: ProjectLinkConnection;
   /** Users that are members of the project. */
   members: UserConnection;
-  /** The milestone that this project is associated with. */
+  /**
+   * The milestone that this project is associated with.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestone?: Maybe<Milestone>;
   /** The project's name. */
   name: Scalars['String'];
   /** The overall progress of the project. This is the (completed estimate points + 0.25 * in progress estimate points) / total estimate points. */
   progress: Scalars['Float'];
+  /** [ALPHA] Milestones associated with the project. */
+  projectMilestones: ProjectMilestoneConnection;
+  /** The time until which project update reminders are paused. */
+  projectUpdateRemindersPausedUntilAt?: Maybe<Scalars['DateTime']>;
+  /** Project updates associated with the project. */
+  projectUpdates: ProjectUpdateConnection;
+  /** The overall scope (total estimate points) of the project. */
+  scope: Scalars['Float'];
   /** The total number of estimation points after each week. */
   scopeHistory: Array<Scalars['Float']>;
   /** Whether to send new issue comment notifications to Slack. */
@@ -4626,7 +5627,7 @@ export type Project = Node & {
   slackNewIssue: Scalars['Boolean'];
   /** The project's unique URL slug. */
   slugId: Scalars['String'];
-  /** The sort order for the project within its milestone. */
+  /** The sort order for the project within its milestone/initiative. */
   sortOrder: Scalars['Float'];
   /** [Internal] The estimated start date of the project. */
   startDate?: Maybe<Scalars['TimelessDate']>;
@@ -4639,8 +5640,9 @@ export type Project = Node & {
   /** Teams associated with this project. */
   teams: TeamConnection;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Project URL. */
@@ -4696,6 +5698,28 @@ export type ProjectMembersArgs = {
 
 
 /** A project. */
+export type ProjectProjectMilestonesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
+/** A project. */
+export type ProjectProjectUpdatesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
+/** A project. */
 export type ProjectTeamsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -4706,10 +5730,10 @@ export type ProjectTeamsArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** [Alpha] Project filtering options. */
+/** Project filtering options. */
 export type ProjectCollectionFilter = {
   /** Compound filters, all of which need to be matched by the project. */
-  and?: InputMaybe<Array<ProjectFilter>>;
+  and?: InputMaybe<Array<ProjectCollectionFilter>>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
   /** Filters that the projects creator must satisfy. */
@@ -4722,14 +5746,18 @@ export type ProjectCollectionFilter = {
   issues?: InputMaybe<IssueCollectionFilter>;
   /** Filters that the projects lead must satisfy. */
   lead?: InputMaybe<NullableUserFilter>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
   /** Filters that the projects members must satisfy. */
   members?: InputMaybe<UserFilter>;
-  /** Filters that the projects milestones must satisfy. */
-  milestone?: InputMaybe<NullableMilestoneFilter>;
   /** Comparator for the project name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the project. */
-  or?: InputMaybe<Array<ProjectFilter>>;
+  or?: InputMaybe<Array<ProjectCollectionFilter>>;
+  /** Filters that the projects roadmaps must satisfy. */
+  roadmaps?: InputMaybe<RoadmapCollectionFilter>;
+  /** Comparator for the project slug ID. */
+  slugId?: InputMaybe<StringComparator>;
   /** Filters that needs to be matched by some projects. */
   some?: InputMaybe<ProjectFilter>;
   /** Comparator for the project start date. */
@@ -4752,11 +5780,13 @@ export type ProjectConnection = {
 export type ProjectCreateInput = {
   /** The color of the project. */
   color?: InputMaybe<Scalars['String']>;
+  /** The ID of the issue from which that project is created. */
+  convertedFromIssueId?: InputMaybe<Scalars['String']>;
   /** The description for the project. */
   description?: InputMaybe<Scalars['String']>;
   /** The icon of the project. */
   icon?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The identifier of the project lead. */
   leadId?: InputMaybe<Scalars['String']>;
@@ -4766,9 +5796,9 @@ export type ProjectCreateInput = {
   milestoneId?: InputMaybe<Scalars['String']>;
   /** The name of the project. */
   name: Scalars['String'];
-  /** The sort order for the project within its milestone. */
+  /** The sort order for the project within shared views. */
   sortOrder?: InputMaybe<Scalars['Float']>;
-  /** [Internal] The planned start date of the project. */
+  /** The planned start date of the project. */
   startDate?: InputMaybe<Scalars['TimelessDate']>;
   /** The state of the project. */
   state?: InputMaybe<Scalars['String']>;
@@ -4785,7 +5815,7 @@ export type ProjectEdge = {
   node: Project;
 };
 
-/** [Alpha] Project filtering options. */
+/** Project filtering options. */
 export type ProjectFilter = {
   /** Compound filters, all of which need to be matched by the project. */
   and?: InputMaybe<Array<ProjectFilter>>;
@@ -4801,12 +5831,14 @@ export type ProjectFilter = {
   lead?: InputMaybe<NullableUserFilter>;
   /** Filters that the projects members must satisfy. */
   members?: InputMaybe<UserFilter>;
-  /** Filters that the projects milestones must satisfy. */
-  milestone?: InputMaybe<NullableMilestoneFilter>;
   /** Comparator for the project name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the project. */
   or?: InputMaybe<Array<ProjectFilter>>;
+  /** Filters that the projects roadmaps must satisfy. */
+  roadmaps?: InputMaybe<RoadmapCollectionFilter>;
+  /** Comparator for the project slug ID. */
+  slugId?: InputMaybe<StringComparator>;
   /** Comparator for the project start date. */
   startDate?: InputMaybe<NullableDateComparator>;
   /** Comparator for the project state. */
@@ -4833,8 +5865,9 @@ export type ProjectLink = Node & {
   /** The project that the link is associated with. */
   project: Project;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The link's URL. */
@@ -4849,7 +5882,7 @@ export type ProjectLinkConnection = {
 };
 
 export type ProjectLinkCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The label for the link. */
   label: Scalars['String'];
@@ -4883,6 +5916,151 @@ export type ProjectLinkUpdateInput = {
   url?: InputMaybe<Scalars['String']>;
 };
 
+/** A milestone for a project. */
+export type ProjectMilestone = Node & {
+  __typename?: 'ProjectMilestone';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The description of the project milestone. */
+  description?: Maybe<Scalars['String']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The name of the project milestone. */
+  name: Scalars['String'];
+  /** The project of the milestone. */
+  project: Project;
+  /** The planned completion date of the milestone. */
+  targetDate?: Maybe<Scalars['TimelessDate']>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type ProjectMilestoneConnection = {
+  __typename?: 'ProjectMilestoneConnection';
+  edges: Array<ProjectMilestoneEdge>;
+  nodes: Array<ProjectMilestone>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectMilestoneCreateInput = {
+  /** The description of the project milestone. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The name of the project milestone. */
+  name: Scalars['String'];
+  /** Related project for the project milestone. */
+  projectId: Scalars['String'];
+  /** The planned target date of the project milestone. */
+  targetDate?: InputMaybe<Scalars['TimelessDate']>;
+};
+
+export type ProjectMilestoneEdge = {
+  __typename?: 'ProjectMilestoneEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: ProjectMilestone;
+};
+
+export type ProjectMilestonePayload = {
+  __typename?: 'ProjectMilestonePayload';
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** The project milestone that was created or updated. */
+  projectMilestone: ProjectMilestone;
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+export type ProjectMilestoneUpdateInput = {
+  /** The description of the project milestone. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The name of the project milestone. */
+  name?: InputMaybe<Scalars['String']>;
+  /** Related project for the project milestone. */
+  projectId?: InputMaybe<Scalars['String']>;
+  /** The planned target date of the project milestone. */
+  targetDate?: InputMaybe<Scalars['TimelessDate']>;
+};
+
+/** A project related notification */
+export type ProjectNotification = Entity & Node & Notification & {
+  __typename?: 'ProjectNotification';
+  /** The user that caused the notification. If empty it's Linear itself. */
+  actor?: Maybe<User>;
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /**
+   * The time at when an email reminder for this notification was sent to the user. Null, if no email
+   *     reminder has been sent.
+   */
+  emailedAt?: Maybe<Scalars['DateTime']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The project related to the notification. */
+  project: Project;
+  /** The project update related to the notification. */
+  projectUpdate?: Maybe<ProjectUpdate>;
+  /** The time at when the user marked the notification as read. Null, if the the user hasn't read the notification */
+  readAt?: Maybe<Scalars['DateTime']>;
+  /** The time until a notification will be snoozed. After that it will appear in the inbox again. */
+  snoozedUntilAt?: Maybe<Scalars['DateTime']>;
+  /** Notification type */
+  type: Scalars['String'];
+  /** The time at which a notification was unsnoozed.. */
+  unsnoozedAt?: Maybe<Scalars['DateTime']>;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user that received the notification. */
+  user: User;
+};
+
+/** A project notification subscription. */
+export type ProjectNotificationSubscription = Entity & Node & NotificationSubscription & {
+  __typename?: 'ProjectNotificationSubscription';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The project subscribed to. */
+  project: Project;
+  /** The type of the project subscription. */
+  projectNotificationSubscriptionType: ProjectNotificationSubscriptionType;
+  /** Subscribed team. */
+  team?: Maybe<Team>;
+  /** The type of the subscription. */
+  type: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user associated with notification subscriptions. */
+  user: User;
+};
+
+/** The type of a project notification subscription. */
+export enum ProjectNotificationSubscriptionType {
+  All = 'all',
+  Custom = 'custom',
+  ImportantOnly = 'importantOnly'
+}
+
 export type ProjectPayload = {
   __typename?: 'ProjectPayload';
   /** The identifier of the last sync operation. */
@@ -4893,6 +6071,69 @@ export type ProjectPayload = {
   success: Scalars['Boolean'];
 };
 
+/** A update associated with an project. */
+export type ProjectUpdate = Node & {
+  __typename?: 'ProjectUpdate';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The update content in markdown format. */
+  body: Scalars['String'];
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The time the project update was edited. */
+  editedAt?: Maybe<Scalars['DateTime']>;
+  /** The health of the project at the time of the update. */
+  health: ProjectUpdateHealthType;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The project that the update is associated with. */
+  project: Project;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The URL to the project update. */
+  url: Scalars['String'];
+  /** The user who wrote the update. */
+  user: User;
+};
+
+export type ProjectUpdateConnection = {
+  __typename?: 'ProjectUpdateConnection';
+  edges: Array<ProjectUpdateEdge>;
+  nodes: Array<ProjectUpdate>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectUpdateCreateInput = {
+  /** The content of the project update in markdown format. */
+  body?: InputMaybe<Scalars['String']>;
+  /** The content of the project update as a Prosemirror document. */
+  bodyData?: InputMaybe<Scalars['JSON']>;
+  /** The health of the project at the time of the update. */
+  health?: InputMaybe<ProjectUpdateHealthType>;
+  /** The identifier. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The project to associate the project update with. */
+  projectId: Scalars['String'];
+};
+
+export type ProjectUpdateEdge = {
+  __typename?: 'ProjectUpdateEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: ProjectUpdate;
+};
+
+/** The health type of a project when the update is created. */
+export enum ProjectUpdateHealthType {
+  AtRisk = 'atRisk',
+  OffTrack = 'offTrack',
+  OnTrack = 'onTrack'
+}
+
 export type ProjectUpdateInput = {
   /** The date when the project was canceled. */
   canceledAt?: InputMaybe<Scalars['DateTime']>;
@@ -4900,6 +6141,8 @@ export type ProjectUpdateInput = {
   color?: InputMaybe<Scalars['String']>;
   /** The date when the project was completed. */
   completedAt?: InputMaybe<Scalars['DateTime']>;
+  /** The ID of the issue from which that project is created. */
+  convertedFromIssueId?: InputMaybe<Scalars['String']>;
   /** The description for the project. */
   description?: InputMaybe<Scalars['String']>;
   /** The icon of the project. */
@@ -4912,15 +6155,17 @@ export type ProjectUpdateInput = {
   milestoneId?: InputMaybe<Scalars['String']>;
   /** The name of the project. */
   name?: InputMaybe<Scalars['String']>;
+  /** The time until which project update reminders are paused. */
+  projectUpdateRemindersPausedUntilAt?: InputMaybe<Scalars['DateTime']>;
   /** Whether to send new issue comment notifications to Slack. */
   slackIssueComments?: InputMaybe<Scalars['Boolean']>;
   /** Whether to send issue status update notifications to Slack. */
   slackIssueStatuses?: InputMaybe<Scalars['Boolean']>;
   /** Whether to send new issue notifications to Slack. */
   slackNewIssue?: InputMaybe<Scalars['Boolean']>;
-  /** The sort order for the project within its milestone. */
+  /** The sort order for the project in shared views. */
   sortOrder?: InputMaybe<Scalars['Float']>;
-  /** [Internal] The planned start date of the project. */
+  /** The planned start date of the project. */
   startDate?: InputMaybe<Scalars['TimelessDate']>;
   /** The state of the project. */
   state?: InputMaybe<Scalars['String']>;
@@ -4928,6 +6173,100 @@ export type ProjectUpdateInput = {
   targetDate?: InputMaybe<Scalars['TimelessDate']>;
   /** The identifiers of the teams this project is associated with. */
   teamIds?: InputMaybe<Array<Scalars['String']>>;
+};
+
+/** Holds information about when a user has interacted with a project update. */
+export type ProjectUpdateInteraction = Node & {
+  __typename?: 'ProjectUpdateInteraction';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The project update that has been interacted with. */
+  projectUpdate: ProjectUpdate;
+  /** The time at which the user read the project update. */
+  readAt: Scalars['DateTime'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user that has interacted with the project update. */
+  user: User;
+};
+
+export type ProjectUpdateInteractionConnection = {
+  __typename?: 'ProjectUpdateInteractionConnection';
+  edges: Array<ProjectUpdateInteractionEdge>;
+  nodes: Array<ProjectUpdateInteraction>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectUpdateInteractionCreateInput = {
+  /** The identifier. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The id of the project update that has been interacted with. */
+  projectUpdateId: Scalars['String'];
+  /** The time at which the user read the project update. */
+  readAt: Scalars['DateTime'];
+};
+
+export type ProjectUpdateInteractionEdge = {
+  __typename?: 'ProjectUpdateInteractionEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: ProjectUpdateInteraction;
+};
+
+export type ProjectUpdateInteractionPayload = {
+  __typename?: 'ProjectUpdateInteractionPayload';
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** The project update interaction that was created or updated. */
+  projectUpdateInteraction: ProjectUpdateInteraction;
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+export type ProjectUpdatePayload = {
+  __typename?: 'ProjectUpdatePayload';
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** The project update that was created or updated. */
+  projectUpdate: ProjectUpdate;
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+/** The frequency at which to send project update reminders. */
+export enum ProjectUpdateReminderFrequency {
+  Never = 'never',
+  TwoWeeks = 'twoWeeks',
+  Week = 'week'
+}
+
+export type ProjectUpdateUpdateInput = {
+  /** The content of the project update in markdown format. */
+  body?: InputMaybe<Scalars['String']>;
+  /** The content of the project update as a Prosemirror document. */
+  bodyData?: InputMaybe<Scalars['JSON']>;
+  /** The health of the project at the time of the update. */
+  health?: InputMaybe<ProjectUpdateHealthType>;
+};
+
+export type ProjectUpdateWithInteractionPayload = {
+  __typename?: 'ProjectUpdateWithInteractionPayload';
+  /** The project update that was created or updated. */
+  interaction: ProjectUpdateInteraction;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** The project update that was created or updated. */
+  projectUpdate: ProjectUpdate;
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
 };
 
 /** Pull request data */
@@ -4942,12 +6281,31 @@ export type PullRequestPayload = {
   number: Scalars['Float'];
   repoLogin: Scalars['String'];
   repoName: Scalars['String'];
+  reviewers?: Maybe<Array<Scalars['String']>>;
+  reviews?: Maybe<Array<PullRequestReview>>;
   status: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['String'];
   url: Scalars['String'];
   userId: Scalars['String'];
   userLogin: Scalars['String'];
+};
+
+/** Pull request review data */
+export type PullRequestReview = {
+  __typename?: 'PullRequestReview';
+  /** The ID of the review. */
+  id: Scalars['Float'];
+  /** [Internal] The reviewer's avatar URL. */
+  reviewerAvatarUrl?: Maybe<Scalars['String']>;
+  /** The user ID of the reviewer. */
+  reviewerId: Scalars['Float'];
+  /** The login of the reviewer. */
+  reviewerLogin: Scalars['String'];
+  /** The state of the review. */
+  state: Scalars['String'];
+  /** The timestamp of review submission. */
+  submittedAt: Scalars['String'];
 };
 
 /** A user's web browser push notification subscription. */
@@ -4960,8 +6318,9 @@ export type PushSubscription = Node & {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -4976,8 +6335,10 @@ export type PushSubscriptionConnection = {
 export type PushSubscriptionCreateInput = {
   /** The data of the subscription in stringified JSON format. */
   data: Scalars['String'];
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
+  /** Whether this is a subscription payload for Google Cloud Messaging or Apple Push Notification service */
+  type?: InputMaybe<PushSubscriptionType>;
   /** The user identifier of the subscription. */
   userId: Scalars['String'];
 };
@@ -5003,51 +6364,57 @@ export type PushSubscriptionTestPayload = {
   success: Scalars['Boolean'];
 };
 
+/** The different push subscription types */
+export enum PushSubscriptionType {
+  Apple = 'apple',
+  Web = 'web'
+}
+
 export type Query = {
   __typename?: 'Query';
+  /** One specific project milestone. */
+  ProjectMilestone: ProjectMilestone;
+  /** All milestones for the project. */
+  ProjectMilestones: ProjectMilestoneConnection;
   /** All teams you the user can administrate. Administrable teams are teams whose settings the user can change, but to whose issues the user doesn't necessarily have access to. */
   administrableTeams: TeamConnection;
-  /** [Internal] All API keys for the user. */
+  /** All API keys for the user. */
   apiKeys: ApiKeyConnection;
+  /** Get basic information for an application. */
+  applicationInfo: Application;
+  /** [INTERNAL] Get basic information for a list of applications */
+  applicationInfoByIds: Array<Application>;
   /** Get information for an application and whether a user has approved it for the given scopes. */
   applicationWithAuthorization: UserAuthorizedApplication;
-  /** [Internal] Fetches an archived model. */
-  archivedModelSync: ArchiveResponse;
-  /** [Internal] Fetches archived models. */
-  archivedModelsSync: ArchiveResponse;
   /**
    *
-   * [Alpha] One specific issue attachment.
+   * One specific issue attachment.
    * [Deprecated] 'url' can no longer be used as the 'id' parameter. Use 'attachmentsForUrl' instead
    */
   attachment: Attachment;
   /**
    *
-   * [Alpha] Query an issue by its associated attachment, and its id.
+   * Query an issue by its associated attachment, and its id.
    *
    * @deprecated Will be removed in near future, please use `attachmentsForURL` to get attachments and their issues instead.
    */
   attachmentIssue: Issue;
   /**
-   * [Alpha] All issue attachments.
+   * All issue attachments.
    *
    * To get attachments for a given URL, use `attachmentsForURL` query.
    */
   attachments: AttachmentConnection;
-  /** [Alpha] Returns issue attachments for a given `url`. */
+  /** Returns issue attachments for a given `url`. */
   attachmentsForURL: AttachmentConnection;
   /** All audit log entries. */
   auditEntries: AuditEntryConnection;
   /** List of audit entry types. */
   auditEntryTypes: Array<AuditEntryType>;
-  /** Get all authorized applications for a user */
+  /** [INTERNAL] Get all authorized applications for a user */
   authorizedApplications: Array<AuthorizedApplication>;
   /** Fetch users belonging to this user account. */
   availableUsers: AuthResolverResponse;
-  /** Billing details for the customer. */
-  billingDetails: BillingDetailsPayload;
-  /** Join collaborative document and get missing steps. */
-  collaborativeDocumentJoin: CollaborationDocumentUpdatePayload;
   /** A specific comment. */
   comment: Comment;
   /** All comments. */
@@ -5060,12 +6427,8 @@ export type Query = {
   cycle: Cycle;
   /** All cycles. */
   cycles: CycleConnection;
-  /** [Internal] Fetches the dependencies of a model. */
-  dependentModelSync: DependencyResponse;
   /** One specific document. */
   document: Document;
-  /** [Internal] Searches documentation. */
-  documentationSearch: Array<DocumentationSearchPayload>;
   /** All documents for the project. */
   documents: DocumentConnection;
   /** A specific emoji. */
@@ -5080,16 +6443,26 @@ export type Query = {
   figmaEmbedInfo: FigmaEmbedPayload;
   /** One specific integration. */
   integration: Integration;
-  /** One specific integration resource. (e.g. linked GitHub pull requests for an issue) */
+  /**
+   * One specific integration resource. (e.g. linked GitHub pull requests for an issue)
+   * @deprecated This query will soon be deprecated, please use `attachment` instead
+   */
   integrationResource: IntegrationResource;
-  /** All integrations resources (e.g. linked GitHub pull requests for issues). */
+  /**
+   * All integrations resources (e.g. linked GitHub pull requests for issues).
+   * @deprecated This query will soon be deprecated, please use `attachments` instead
+   */
   integrationResources: IntegrationResourceConnection;
+  /** One specific integrationTemplate. */
+  integrationTemplate: IntegrationTemplate;
+  /** Template and integration connections. */
+  integrationTemplates: IntegrationTemplateConnection;
   /** All integrations. */
   integrations: IntegrationConnection;
+  /** One specific set of settings. */
+  integrationsSettings: IntegrationsSettings;
   /** One specific issue. */
   issue: Issue;
-  /** [Internal] The history of issue descriptions. */
-  issueDescriptionHistory: IssueDescriptionHistoryPayload;
   /** Fetches the GitHub token, completing the OAuth flow. */
   issueImportFinishGithubOAuth: GithubOAuthTokenPayload;
   /** One specific label. */
@@ -5104,11 +6477,19 @@ export type Query = {
   issueRelations: IssueRelationConnection;
   /** [ALPHA] Search issues. This query is experimental and is subject to change without notice. */
   issueSearch: IssueConnection;
+  /** Find issue based on the VCS branch name. */
+  issueVcsBranchSearch?: Maybe<Issue>;
   /** All issues. */
   issues: IssueConnection;
-  /** One specific milestone. */
+  /**
+   * One specific milestone.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestone: Milestone;
-  /** All milestones. */
+  /**
+   * All milestones.
+   * @deprecated Milestones will be removed. Use roadmaps instead.
+   */
   milestones: MilestoneConnection;
   /** One specific notification. */
   notification: Notification;
@@ -5120,6 +6501,8 @@ export type Query = {
   notifications: NotificationConnection;
   /** The user's organization. */
   organization: Organization;
+  /** [INTERNAL] Checks whether the domain can be claimed. */
+  organizationDomainClaimRequest: OrganizationDomainClaimPayload;
   /** Does the organization exist. */
   organizationExists: OrganizationExistsPayload;
   /** One specific organization invite. */
@@ -5134,26 +6517,30 @@ export type Query = {
   projectLink: ProjectLink;
   /** All links for the project. */
   projectLinks: ProjectLinkConnection;
+  /** A specific project update. */
+  projectUpdate: ProjectUpdate;
+  /** A specific interaction on a project update. */
+  projectUpdateInteraction: ProjectUpdateInteraction;
+  /** All interactions on project updates. */
+  projectUpdateInteractions: ProjectUpdateInteractionConnection;
+  /** All project updates. */
+  projectUpdates: ProjectUpdateConnection;
   /** All projects. */
   projects: ProjectConnection;
   /** Sends a test push message. */
   pushSubscriptionTest: PushSubscriptionTestPayload;
-  /** A specific reaction. */
-  reaction: Reaction;
-  /** All comment emoji reactions. */
-  reactions: ReactionConnection;
-  /** [Internal] Search in Linear. This query is for internal purposes only and is subject to change without notice. */
-  search: SearchResultPayload;
+  /** The status of the rate limiter. */
+  rateLimitStatus: RateLimitPayload;
+  /** One specific roadmap. */
+  roadmap: Roadmap;
+  /** One specific roadmapToProject. */
+  roadmapToProject: RoadmapToProject;
+  /** Custom views for the user. */
+  roadmapToProjects: RoadmapToProjectConnection;
+  /** All roadmaps in the workspace. */
+  roadmaps: RoadmapConnection;
   /** Fetch SSO login URL for the email provided. */
   ssoUrlFromEmail: SsoUrlFromEmailResponse;
-  /** The organization's subscription. */
-  subscription?: Maybe<Subscription>;
-  /** [Internal] Syncs a batch of models. */
-  syncBatch: SyncBatchResponse;
-  /** [Internal] Fetch data to catch up the client to the state of the world. */
-  syncBootstrap: SyncResponse;
-  /** [Internal] Fetches delta sync packets. */
-  syncDelta: SyncDeltaResponse;
   /** One specific team. */
   team: Team;
   /** One specific team membership. */
@@ -5168,6 +6555,10 @@ export type Query = {
   templates: Array<Template>;
   /** One specific user. */
   user: User;
+  /** [INTERNAL] Checks if there's a currently active email verification challenge for a user account. */
+  userAccountEmailChangeFind: UserAccountEmailChangeFindPayload;
+  /** Finds a user account by email. */
+  userAccountExists?: Maybe<UserAccountExistsPayload>;
   /** The user's settings. */
   userSettings: UserSettings;
   /** All users for the organization. */
@@ -5182,6 +6573,23 @@ export type Query = {
   workflowState: WorkflowState;
   /** All issue workflow states. */
   workflowStates: WorkflowStateConnection;
+  /** [INTERNAL] Get all authorized applications (with limited fields) for a workspace */
+  workspaceAuthorizedApplications: Array<WorkspaceAuthorizedApplication>;
+};
+
+
+export type QueryProjectMilestoneArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryProjectMilestonesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 
@@ -5206,25 +6614,21 @@ export type QueryApiKeysArgs = {
 };
 
 
+export type QueryApplicationInfoArgs = {
+  clientId: Scalars['String'];
+};
+
+
+export type QueryApplicationInfoByIdsArgs = {
+  ids: Array<Scalars['String']>;
+};
+
+
 export type QueryApplicationWithAuthorizationArgs = {
+  actor?: InputMaybe<Scalars['String']>;
   clientId: Scalars['String'];
   redirectUri?: InputMaybe<Scalars['String']>;
   scope: Array<Scalars['String']>;
-};
-
-
-export type QueryArchivedModelSyncArgs = {
-  identifier: Scalars['String'];
-  modelClass: Scalars['String'];
-};
-
-
-export type QueryArchivedModelsSyncArgs = {
-  before?: InputMaybe<Scalars['DateTime']>;
-  last?: InputMaybe<Scalars['Int']>;
-  modelClass: Scalars['String'];
-  teamId: Scalars['String'];
-  trashOption?: InputMaybe<TrashOptionType>;
 };
 
 
@@ -5268,13 +6672,6 @@ export type QueryAuditEntriesArgs = {
   includeArchived?: InputMaybe<Scalars['Boolean']>;
   last?: InputMaybe<Scalars['Int']>;
   orderBy?: InputMaybe<PaginationOrderBy>;
-};
-
-
-export type QueryCollaborativeDocumentJoinArgs = {
-  clientId: Scalars['String'];
-  issueId: Scalars['String'];
-  version: Scalars['Int'];
 };
 
 
@@ -5325,20 +6722,8 @@ export type QueryCyclesArgs = {
 };
 
 
-export type QueryDependentModelSyncArgs = {
-  identifier: Scalars['String'];
-  modelClass: Scalars['String'];
-};
-
-
 export type QueryDocumentArgs = {
   id: Scalars['String'];
-};
-
-
-export type QueryDocumentationSearchArgs = {
-  query: Scalars['String'];
-  type: Scalars['String'];
 };
 
 
@@ -5408,6 +6793,21 @@ export type QueryIntegrationResourcesArgs = {
 };
 
 
+export type QueryIntegrationTemplateArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryIntegrationTemplatesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
 export type QueryIntegrationsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -5418,12 +6818,12 @@ export type QueryIntegrationsArgs = {
 };
 
 
-export type QueryIssueArgs = {
+export type QueryIntegrationsSettingsArgs = {
   id: Scalars['String'];
 };
 
 
-export type QueryIssueDescriptionHistoryArgs = {
+export type QueryIssueArgs = {
   id: Scalars['String'];
 };
 
@@ -5476,6 +6876,11 @@ export type QueryIssueSearchArgs = {
 };
 
 
+export type QueryIssueVcsBranchSearchArgs = {
+  branchName: Scalars['String'];
+};
+
+
 export type QueryIssuesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -5495,7 +6900,6 @@ export type QueryMilestoneArgs = {
 export type QueryMilestonesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
-  filter?: InputMaybe<MilestoneFilter>;
   first?: InputMaybe<Scalars['Int']>;
   includeArchived?: InputMaybe<Scalars['Boolean']>;
   last?: InputMaybe<Scalars['Int']>;
@@ -5530,6 +6934,11 @@ export type QueryNotificationsArgs = {
   includeArchived?: InputMaybe<Scalars['Boolean']>;
   last?: InputMaybe<Scalars['Int']>;
   orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
+export type QueryOrganizationDomainClaimRequestArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -5578,6 +6987,36 @@ export type QueryProjectLinksArgs = {
 };
 
 
+export type QueryProjectUpdateArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryProjectUpdateInteractionArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryProjectUpdateInteractionsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
+export type QueryProjectUpdatesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+
 export type QueryProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -5589,12 +7028,17 @@ export type QueryProjectsArgs = {
 };
 
 
-export type QueryReactionArgs = {
+export type QueryRoadmapArgs = {
   id: Scalars['String'];
 };
 
 
-export type QueryReactionsArgs = {
+export type QueryRoadmapToProjectArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryRoadmapToProjectsArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -5604,34 +7048,19 @@ export type QueryReactionsArgs = {
 };
 
 
-export type QuerySearchArgs = {
-  from?: InputMaybe<Scalars['Int']>;
-  term: Scalars['String'];
+export type QueryRoadmapsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
 
 export type QuerySsoUrlFromEmailArgs = {
   email: Scalars['String'];
   isDesktop?: InputMaybe<Scalars['Boolean']>;
-};
-
-
-export type QuerySyncBatchArgs = {
-  requests: Array<BatchRequest>;
-};
-
-
-export type QuerySyncBootstrapArgs = {
-  newVersion?: InputMaybe<Scalars['Boolean']>;
-  onlyModels?: InputMaybe<Array<Scalars['String']>>;
-  syncGroups?: InputMaybe<Array<Scalars['String']>>;
-};
-
-
-export type QuerySyncDeltaArgs = {
-  lastSyncId: Scalars['Int'];
-  offset?: InputMaybe<Scalars['Int']>;
-  toSyncId: Scalars['Int'];
 };
 
 
@@ -5673,6 +7102,16 @@ export type QueryTemplateArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryUserAccountEmailChangeFindArgs = {
+  email: Scalars['String'];
+};
+
+
+export type QueryUserAccountExistsArgs = {
+  email: Scalars['String'];
 };
 
 
@@ -5718,13 +7157,37 @@ export type QueryWorkflowStatesArgs = {
   orderBy?: InputMaybe<PaginationOrderBy>;
 };
 
-/** A reaction associated with a comment. */
+export type RateLimitPayload = {
+  __typename?: 'RateLimitPayload';
+  /** The identifier we rate limit on. */
+  identifier?: Maybe<Scalars['String']>;
+  /** The kind of rate limit selected for this request. */
+  kind: Scalars['String'];
+  /** The state of the rate limit. */
+  limits: Array<RateLimitResultPayload>;
+};
+
+export type RateLimitResultPayload = {
+  __typename?: 'RateLimitResultPayload';
+  /** The total allowed quantity for this type of limit. */
+  allowedAmount: Scalars['Float'];
+  /** The period in which the rate limit is fully replenished in ms. */
+  period: Scalars['Float'];
+  /** The remaining quantity for this type of limit after this request. */
+  remainingAmount: Scalars['Float'];
+  /** The requested quantity for this type of limit. */
+  requestedAmount: Scalars['Float'];
+  /** The timestamp after the rate limit is fully replenished as a UNIX timestamp. */
+  reset: Scalars['Float'];
+  /** What is being rate limited. */
+  type: Scalars['String'];
+};
+
+/** A reaction associated with a comment or a project update. */
 export type Reaction = Node & {
   __typename?: 'Reaction';
   /** The time at which the entity was archived. Null if the entity has not been archived. */
   archivedAt?: Maybe<Scalars['DateTime']>;
-  /** The comment that the reaction is associated with. */
-  comment: Comment;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** Name of the reaction's emoji. */
@@ -5732,8 +7195,9 @@ export type Reaction = Node & {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The user who reacted. */
@@ -5749,11 +7213,13 @@ export type ReactionConnection = {
 
 export type ReactionCreateInput = {
   /** The comment to associate the reaction with. */
-  commentId: Scalars['String'];
+  commentId?: InputMaybe<Scalars['String']>;
   /** The emoji the user reacted with. */
   emoji?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one */
   id?: InputMaybe<Scalars['String']>;
+  /** The project update to associate the reaction with. */
+  projectUpdateId?: InputMaybe<Scalars['String']>;
 };
 
 export type ReactionEdge = {
@@ -5771,19 +7237,212 @@ export type ReactionPayload = {
   success: Scalars['Boolean'];
 };
 
-export type RotateSecretPayload = {
-  __typename?: 'RotateSecretPayload';
+/** Comparator for relation existence. */
+export type RelationExistsComparator = {
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars['Boolean']>;
+  /** Not equals constraint. */
+  neq?: InputMaybe<Scalars['Boolean']>;
+};
+
+/** A roadmap for projects. */
+export type Roadmap = Node & {
+  __typename?: 'Roadmap';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The user who created the roadmap. */
+  creator: User;
+  /** The description of the roadmap. */
+  description?: Maybe<Scalars['String']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The name of the roadmap. */
+  name: Scalars['String'];
+  /** The organization of the roadmap. */
+  organization: Organization;
+  /** The user who owns the roadmap. */
+  owner: User;
+  /** Projects associated with the roadmap. */
+  projects: ProjectConnection;
+  /** The roadmap's unique URL slug. */
+  slugId: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+
+/** A roadmap for projects. */
+export type RoadmapProjectsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  filter?: InputMaybe<ProjectFilter>;
+  first?: InputMaybe<Scalars['Int']>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+};
+
+/** Roadmap collection filtering options. */
+export type RoadmapCollectionFilter = {
+  /** Compound filters, all of which need to be matched by the roadmap. */
+  and?: InputMaybe<Array<RoadmapCollectionFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the roadmap creator must satisfy. */
+  creator?: InputMaybe<UserFilter>;
+  /** Filters that needs to be matched by all roadmaps. */
+  every?: InputMaybe<RoadmapFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Comparator for the roadmap name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the roadmap. */
+  or?: InputMaybe<Array<RoadmapCollectionFilter>>;
+  /** Comparator for the roadmap slug ID. */
+  slugId?: InputMaybe<StringComparator>;
+  /** Filters that needs to be matched by some roadmaps. */
+  some?: InputMaybe<RoadmapFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
+export type RoadmapConnection = {
+  __typename?: 'RoadmapConnection';
+  edges: Array<RoadmapEdge>;
+  nodes: Array<Roadmap>;
+  pageInfo: PageInfo;
+};
+
+export type RoadmapCreateInput = {
+  /** The description of the roadmap. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The name of the roadmap. */
+  name: Scalars['String'];
+  /** The owner of the roadmap */
+  ownerId?: InputMaybe<Scalars['String']>;
+};
+
+export type RoadmapEdge = {
+  __typename?: 'RoadmapEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: Roadmap;
+};
+
+/** Roadmap filtering options. */
+export type RoadmapFilter = {
+  /** Compound filters, all of which need to be matched by the roadmap. */
+  and?: InputMaybe<Array<RoadmapFilter>>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Filters that the roadmap creator must satisfy. */
+  creator?: InputMaybe<UserFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Comparator for the roadmap name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the roadmap. */
+  or?: InputMaybe<Array<RoadmapFilter>>;
+  /** Comparator for the roadmap slug ID. */
+  slugId?: InputMaybe<StringComparator>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
+};
+
+export type RoadmapPayload = {
+  __typename?: 'RoadmapPayload';
   /** The identifier of the last sync operation. */
   lastSyncId: Scalars['Float'];
+  /** The roadmap that was created or updated. */
+  roadmap: Roadmap;
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
 };
 
-/** The integration resource's settings */
+/** Join table between projects and roadmaps */
+export type RoadmapToProject = Node & {
+  __typename?: 'RoadmapToProject';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The project that the roadmap is associated with. */
+  project: Project;
+  /** The roadmap that the project is associated with. */
+  roadmap: Roadmap;
+  /** The sort order of the project within the roadmap. */
+  sortOrder: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type RoadmapToProjectConnection = {
+  __typename?: 'RoadmapToProjectConnection';
+  edges: Array<RoadmapToProjectEdge>;
+  nodes: Array<RoadmapToProject>;
+  pageInfo: PageInfo;
+};
+
+export type RoadmapToProjectCreateInput = {
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
+  id?: InputMaybe<Scalars['String']>;
+  /** The identifier of the project. */
+  projectId: Scalars['String'];
+  /** The identifier of the roadmap. */
+  roadmapId: Scalars['String'];
+  /** The sort order for the project within its milestone. */
+  sortOrder?: InputMaybe<Scalars['Float']>;
+};
+
+export type RoadmapToProjectEdge = {
+  __typename?: 'RoadmapToProjectEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: RoadmapToProject;
+};
+
+export type RoadmapToProjectPayload = {
+  __typename?: 'RoadmapToProjectPayload';
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** The roadmapToProject that was created or updated. */
+  roadmapToProject: RoadmapToProject;
+  /** Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+export type RoadmapToProjectUpdateInput = {
+  /** The sort order for the project within its milestone. */
+  sortOrder?: InputMaybe<Scalars['Float']>;
+};
+
+export type RoadmapUpdateInput = {
+  /** The description of the roadmap. */
+  description?: InputMaybe<Scalars['String']>;
+  /** The name of the roadmap. */
+  name?: InputMaybe<Scalars['String']>;
+  /** The owner of the roadmap */
+  ownerId?: InputMaybe<Scalars['String']>;
+};
+
 export type SamlConfiguration = {
   __typename?: 'SamlConfiguration';
-  /** List of allowed email domains for SAML authentication. */
-  allowedDomains?: Maybe<Array<Scalars['String']>>;
   /** The issuer's custom entity ID. */
   issuerEntityId?: Maybe<Scalars['String']>;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
@@ -5797,8 +7456,6 @@ export type SamlConfiguration = {
 };
 
 export type SamlConfigurationInput = {
-  /** List of allowed email domains for SAML authentication. */
-  allowedDomains?: InputMaybe<Array<Scalars['String']>>;
   /** The issuer's custom entity ID. */
   issuerEntityId?: InputMaybe<Scalars['String']>;
   /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
@@ -5811,14 +7468,17 @@ export type SamlConfigurationInput = {
   ssoSigningCert?: InputMaybe<Scalars['String']>;
 };
 
-export type SearchResultPayload = {
-  __typename?: 'SearchResultPayload';
-  /** Archived issues matching the search term along with all their dependencies. */
-  archivePayload: ArchiveResponse;
-  /** Active issue IDs returned matching the search term. */
-  issueIds: Array<Scalars['String']>;
-  /** Total number of search results. */
-  totalCount: Scalars['Int'];
+/** The organization's SAML configuration */
+export type SamlConfigurationPayload = {
+  __typename?: 'SamlConfigurationPayload';
+  /** The issuer's custom entity ID. */
+  issuerEntityId?: Maybe<Scalars['String']>;
+  /** Binding method for authentication call. Can be either `post` (default) or `redirect`. */
+  ssoBinding?: Maybe<Scalars['String']>;
+  /** Sign in endpoint URL for the identity provider. */
+  ssoEndpoint?: Maybe<Scalars['String']>;
+  /** The algorithm of the Signing Certificate. Can be one of `sha1`, `sha256` (default), or `sha512`. */
+  ssoSignAlgo?: Maybe<Scalars['String']>;
 };
 
 /** Sentry issue data */
@@ -5874,22 +7534,44 @@ export type SlackPostSettingsInput = {
   configurationUrl: Scalars['String'];
 };
 
+/** Comparator for `sourceType` field. */
+export type SourceTypeComparator = {
+  /** Contains constraint. Matches any values that contain the given string. */
+  contains?: InputMaybe<Scalars['String']>;
+  /** Contains case insensitive constraint. Matches any values that contain the given string case insensitive. */
+  containsIgnoreCase?: InputMaybe<Scalars['String']>;
+  /** Ends with constraint. Matches any values that end with the given string. */
+  endsWith?: InputMaybe<Scalars['String']>;
+  /** Equals constraint. */
+  eq?: InputMaybe<Scalars['String']>;
+  /** Equals case insensitive. Matches any values that matches the given string case insensitive. */
+  eqIgnoreCase?: InputMaybe<Scalars['String']>;
+  /** In-array constraint. */
+  in?: InputMaybe<Array<Scalars['String']>>;
+  /** Not-equals constraint. */
+  neq?: InputMaybe<Scalars['String']>;
+  /** Not-equals case insensitive. Matches any values that don't match the given string case insensitive. */
+  neqIgnoreCase?: InputMaybe<Scalars['String']>;
+  /** Not-in-array constraint. */
+  nin?: InputMaybe<Array<Scalars['String']>>;
+  /** Doesn't contain constraint. Matches any values that don't contain the given string. */
+  notContains?: InputMaybe<Scalars['String']>;
+  /** Doesn't contain case insensitive constraint. Matches any values that don't contain the given string case insensitive. */
+  notContainsIgnoreCase?: InputMaybe<Scalars['String']>;
+  /** Doesn't end with constraint. Matches any values that don't end with the given string. */
+  notEndsWith?: InputMaybe<Scalars['String']>;
+  /** Doesn't start with constraint. Matches any values that don't start with the given string. */
+  notStartsWith?: InputMaybe<Scalars['String']>;
+  /** Starts with constraint. Matches any values that start with the given string. */
+  startsWith?: InputMaybe<Scalars['String']>;
+};
+
 export type SsoUrlFromEmailResponse = {
   __typename?: 'SsoUrlFromEmailResponse';
   /** SAML SSO sign-in URL. */
   samlSsoUrl: Scalars['String'];
   /** Whether the operation was successful. */
   success: Scalars['Boolean'];
-};
-
-export type StepsResponse = {
-  __typename?: 'StepsResponse';
-  /** List of client IDs for the document steps. */
-  clientIds: Array<Scalars['String']>;
-  /** New document steps from the client. */
-  steps?: Maybe<Array<Scalars['JSON']>>;
-  /** Client's document version. */
-  version: Scalars['Int'];
 };
 
 /** Comparator for strings. */
@@ -5922,79 +7604,6 @@ export type StringComparator = {
   notStartsWith?: InputMaybe<Scalars['String']>;
   /** Starts with constraint. Matches any values that start with the given string. */
   startsWith?: InputMaybe<Scalars['String']>;
-};
-
-/** The subscription of an organization. */
-export type Subscription = Node & {
-  __typename?: 'Subscription';
-  /** The time at which the entity was archived. Null if the entity has not been archived. */
-  archivedAt?: Maybe<Scalars['DateTime']>;
-  /** The date the subscription was canceled, if any. */
-  canceledAt?: Maybe<Scalars['DateTime']>;
-  /** The time at which the entity was created. */
-  createdAt: Scalars['DateTime'];
-  /** The creator of the subscription. */
-  creator?: Maybe<User>;
-  /** The unique identifier of the entity. */
-  id: Scalars['ID'];
-  /** The date the subscription will be billed next. */
-  nextBillingAt?: Maybe<Scalars['DateTime']>;
-  /** The organization that the subscription is associated with. */
-  organization: Organization;
-  /** The subscription type of a pending change. Null if no change pending. */
-  pendingChangeType?: Maybe<Scalars['String']>;
-  /** The number of seats in the subscription. */
-  seats: Scalars['Float'];
-  /** The subscription type. */
-  type: Scalars['String'];
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
-   */
-  updatedAt: Scalars['DateTime'];
-};
-
-export type SubscriptionPayload = {
-  __typename?: 'SubscriptionPayload';
-  /** The date the subscription was set to cancel at the end of the billing period, if any. */
-  canceledAt?: Maybe<Scalars['DateTime']>;
-  /** The identifier of the last sync operation. */
-  lastSyncId: Scalars['Float'];
-  /** The subscription entity being mutated. */
-  subscription: Subscription;
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
-};
-
-export type SubscriptionSessionPayload = {
-  __typename?: 'SubscriptionSessionPayload';
-  /** The subscription session that was created or updated. */
-  session?: Maybe<Scalars['String']>;
-};
-
-export type SubscriptionUpdateInput = {
-  /** The date the subscription was set to cancel, if any. */
-  canceledAt?: InputMaybe<Scalars['DateTime']>;
-  /** The subscription type of a pending change. Null if no change pending. */
-  pendingChangeType?: InputMaybe<Scalars['String']>;
-};
-
-/** Contains the requested relations. */
-export type SyncBatchResponse = {
-  __typename?: 'SyncBatchResponse';
-  /** A JSON serialized collection of relations model object. */
-  models: Scalars['String'];
-};
-
-/** Contains a delta sync. */
-export type SyncDeltaResponse = {
-  __typename?: 'SyncDeltaResponse';
-  /** Whether the client should try loading more. */
-  loadMore: Scalars['Boolean'];
-  /** Whether loading the delta was successful. In case it wasn't, the client is instructed to do a full bootstrap. */
-  success: Scalars['Boolean'];
-  /** A JSON serialized collection of delta packets. */
-  updates?: Maybe<Scalars['String']>;
 };
 
 /**
@@ -6090,6 +7699,8 @@ export type Team = Node & {
   icon?: Maybe<Scalars['String']>;
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
+  /** Settings for all integrations associated with that team. */
+  integrationsSettings?: Maybe<IntegrationsSettings>;
   /** Unique hash for the team to be used in invite URLs. */
   inviteHash: Scalars['String'];
   /** Whether to allow zeros in issues estimates. */
@@ -6100,6 +7711,8 @@ export type Team = Node & {
   issueEstimationType: Scalars['String'];
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst: Scalars['Boolean'];
+  /** Whether to move issues to bottom of the column when changing state. */
+  issueSortOrderDefaultToBottom: Scalars['Boolean'];
   /** Issues associated with the team. */
   issues: IssueConnection;
   /** The team's unique key. The key is used in URLs. */
@@ -6145,8 +7758,9 @@ export type Team = Node & {
   /** How many upcoming cycles to create. */
   upcomingCycleCount: Scalars['Float'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Webhooks associated with the team. */
@@ -6301,7 +7915,7 @@ export type TeamCreateInput = {
   groupIssueHistory?: InputMaybe<Scalars['Boolean']>;
   /** The icon of the team. */
   icon?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** Whether to allow zeros in issues estimates. */
   issueEstimationAllowZero?: InputMaybe<Scalars['Boolean']>;
@@ -6311,6 +7925,8 @@ export type TeamCreateInput = {
   issueEstimationType?: InputMaybe<Scalars['String']>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to move issues to bottom of the column when changing state. */
+  issueSortOrderDefaultToBottom?: InputMaybe<Scalars['Boolean']>;
   /** The key of the team. If not given, the key will be generated based on the name of the team. */
   key?: InputMaybe<Scalars['String']>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -6336,7 +7952,7 @@ export type TeamEdge = {
   node: Team;
 };
 
-/** [Alpha] Project filtering options. */
+/** Team filtering options. */
 export type TeamFilter = {
   /** Compound filters, all of which need to be matched by the team. */
   and?: InputMaybe<Array<TeamFilter>>;
@@ -6369,11 +7985,14 @@ export type TeamMembership = Node & {
   id: Scalars['ID'];
   /** Whether the user is the owner of the team */
   owner?: Maybe<Scalars['Boolean']>;
+  /** The order of the item in the users team list. */
+  sortOrder: Scalars['Float'];
   /** The team that the membership is associated with. */
   team: Team;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The user that the membership is associated with. */
@@ -6388,10 +8007,12 @@ export type TeamMembershipConnection = {
 };
 
 export type TeamMembershipCreateInput = {
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** Internal. Whether the user is the owner of the team. */
   owner?: InputMaybe<Scalars['Boolean']>;
+  /** The position of the item in the users list. */
+  sortOrder?: InputMaybe<Scalars['Float']>;
   /** The identifier of the team associated with the membership. */
   teamId: Scalars['String'];
   /** The identifier of the user associated with the membership. */
@@ -6417,7 +8038,34 @@ export type TeamMembershipPayload = {
 
 export type TeamMembershipUpdateInput = {
   /** Internal. Whether the user is the owner of the team. */
-  owner: Scalars['Boolean'];
+  owner?: InputMaybe<Scalars['Boolean']>;
+  /** The position of the item in the users list. */
+  sortOrder?: InputMaybe<Scalars['Float']>;
+};
+
+/** A team notification subscription. */
+export type TeamNotificationSubscription = Entity & Node & NotificationSubscription & {
+  __typename?: 'TeamNotificationSubscription';
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** Subscribed project. */
+  project?: Maybe<Project>;
+  /** The team subscribed to. */
+  team: Team;
+  /** The type of the subscription. */
+  type: Scalars['String'];
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+  /** The user associated with notification subscriptions. */
+  user: User;
 };
 
 export type TeamPayload = {
@@ -6479,6 +8127,8 @@ export type TeamUpdateInput = {
   issueEstimationType?: InputMaybe<Scalars['String']>;
   /** Whether issues without priority should be sorted first. */
   issueOrderingNoPriorityFirst?: InputMaybe<Scalars['Boolean']>;
+  /** Whether to move issues to bottom of the column when changing state. */
+  issueSortOrderDefaultToBottom?: InputMaybe<Scalars['Boolean']>;
   /** The key of the team. */
   key?: InputMaybe<Scalars['String']>;
   /** The workflow state into which issues are moved when they are marked as a duplicate of another issue. */
@@ -6520,6 +8170,8 @@ export type Template = Node & {
   description?: Maybe<Scalars['String']>;
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
+  /** The user who last updated the template. */
+  lastUpdatedBy?: Maybe<User>;
   /** The name of the template. */
   name: Scalars['String'];
   /** The organization that the template is associated with. If null, the template is associated with a particular team. */
@@ -6531,8 +8183,9 @@ export type Template = Node & {
   /** The entity type this template is for. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -6547,7 +8200,7 @@ export type TemplateConnection = {
 export type TemplateCreateInput = {
   /** The template description. */
   description?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The template name. */
   name: Scalars['String'];
@@ -6618,13 +8271,6 @@ export type TokenUserAccountAuthInput = {
   token: Scalars['String'];
 };
 
-/** How trashed models should be loaded. */
-export enum TrashOptionType {
-  ExcludeTrash = 'excludeTrash',
-  IncludeTrash = 'includeTrash',
-  TrashOnly = 'trashOnly'
-}
-
 export type UpdateOrganizationInput = {
   /** List of services that are allowed to be used for login. */
   allowedAuthServices?: InputMaybe<Array<Scalars['String']>>;
@@ -6640,10 +8286,20 @@ export type UpdateOrganizationInput = {
   logoUrl?: InputMaybe<Scalars['String']>;
   /** The name of the organization. */
   name?: InputMaybe<Scalars['String']>;
-  /** Whether the organization is using project milestones. */
+  /** Whether the organization has opted for having to approve all OAuth applications for install. */
+  oauthAppReview?: InputMaybe<Scalars['Boolean']>;
+  /** The day at which project updates are sent. */
+  projectUpdateRemindersDay?: InputMaybe<Day>;
+  /** The hour at which project updates are sent. */
+  projectUpdateRemindersHour?: InputMaybe<Scalars['Float']>;
+  /** The frequency at which project updates are sent. */
+  projectUpdatesReminderFrequency?: InputMaybe<ProjectUpdateReminderFrequency>;
+  /** Whether the organization has opted for reduced customer support attachment information. */
   reducedPersonalInformation?: InputMaybe<Scalars['Boolean']>;
-  /** Whether the organization is using project milestones. */
+  /** Whether the organization is using roadmap. */
   roadmapEnabled?: InputMaybe<Scalars['Boolean']>;
+  /** Internal. Whether SLA's have been enabled for the organization. */
+  slaEnabled?: InputMaybe<Scalars['Boolean']>;
   /** The URL key of the organization. */
   urlKey?: InputMaybe<Scalars['String']>;
 };
@@ -6683,7 +8339,7 @@ export type UploadFile = {
   /** The filename. */
   filename: Scalars['String'];
   headers: Array<UploadFileHeader>;
-  metaData?: Maybe<Scalars['JSON']>;
+  metaData?: Maybe<Scalars['JSONObject']>;
   /** The size of the uploaded file. */
   size: Scalars['Int'];
   /** The signed URL the for the uploaded file. (assigned automatically) */
@@ -6721,6 +8377,8 @@ export type User = Node & {
   assignedIssues: IssueConnection;
   /** An URL to the user's avatar image. */
   avatarUrl?: Maybe<Scalars['String']>;
+  /** Hash for the user to be used in calendar URLs. */
+  calendarHash?: Maybe<Scalars['String']>;
   /** The time at which the entity was created. */
   createdAt: Scalars['DateTime'];
   /** Number of issues created. */
@@ -6735,10 +8393,14 @@ export type User = Node & {
   displayName: Scalars['String'];
   /** The user's email address. */
   email: Scalars['String'];
+  /** Whether the user is a guest in the workspace and limited to accessing a subset of teams. */
+  guest: Scalars['Boolean'];
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /** Unique hash for the user to be used in invite URLs. */
   inviteHash: Scalars['String'];
+  /** Whether the user is the currently authenticated user. */
+  isMe: Scalars['Boolean'];
   /** The last time the user was seen online. If null, the user is currently online. */
   lastSeen?: Maybe<Scalars['DateTime']>;
   /** The user's full name. */
@@ -6758,8 +8420,9 @@ export type User = Node & {
   /** The local timezone of the user. */
   timezone?: Maybe<Scalars['String']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** User's profile URL. */
@@ -6834,6 +8497,65 @@ export type UserAccount = {
   users: Array<User>;
 };
 
+/** [INTERNAL] An email change verification challenge. */
+export type UserAccountEmailChange = {
+  __typename?: 'UserAccountEmailChange';
+  /** The time at which the model was archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The timestamp this verification challenge was canceled at. */
+  canceledAt?: Maybe<Scalars['DateTime']>;
+  /** The timestamp the verification codes expire at. */
+  expiresAt: Scalars['DateTime'];
+  /** The model's identifier. */
+  id: Scalars['ID'];
+  /** The new email the user account wants to change to. */
+  newEmail: Scalars['String'];
+  /** The timestamp the new email was verified at. */
+  newEmailVerifiedAt?: Maybe<Scalars['DateTime']>;
+  /** The user account's current email. */
+  oldEmail: Scalars['String'];
+  /** The timestamp the old email was verified at. */
+  oldEmailVerifiedAt?: Maybe<Scalars['DateTime']>;
+  /** The time at which the model was updated. */
+  updatedAt: Scalars['DateTime'];
+};
+
+/** [INTERNAL] Result of searching for a verification challenge for a user account. */
+export type UserAccountEmailChangeFindPayload = {
+  __typename?: 'UserAccountEmailChangeFindPayload';
+  /** [INTERNAL] Whether there is a currently active change. */
+  hasChangeActive: Scalars['Boolean'];
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+};
+
+/** [INTERNAL] Result of verifying an email and code. */
+export type UserAccountEmailChangeVerifyCodePayload = {
+  __typename?: 'UserAccountEmailChangeVerifyCodePayload';
+  /** [INTERNAL] Reason why the operation was not successful. */
+  failureReason?: Maybe<Scalars['Float']>;
+  /** [INTERNAL] Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+/** [INTERNAL] Result of creating or cancelling a verification challenge for email change. */
+export type UserAccountEmailVerificationPayload = {
+  __typename?: 'UserAccountEmailVerificationPayload';
+  /** [INTERNAL] Reason why the operation was not successful. */
+  failureReason?: Maybe<Scalars['Float']>;
+  /** The identifier of the last sync operation. */
+  lastSyncId: Scalars['Float'];
+  /** [INTERNAL] Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
+/** [INTERNAL] Result of looking up a user account by email. */
+export type UserAccountExistsPayload = {
+  __typename?: 'UserAccountExistsPayload';
+  /** [INTERNAL] Whether the operation was successful. */
+  success: Scalars['Boolean'];
+};
+
 export type UserAdminPayload = {
   __typename?: 'UserAdminPayload';
   /** Whether the operation was successful. */
@@ -6843,6 +8565,8 @@ export type UserAdminPayload = {
 /** Public information of the OAuth application, plus whether the application has been authorized for the given scopes. */
 export type UserAuthorizedApplication = {
   __typename?: 'UserAuthorizedApplication';
+  /** Error associated with the application needing to be requested for approval in the workspace */
+  approvalErrorCode?: Maybe<Scalars['String']>;
   /** OAuth application's client ID. */
   clientId: Scalars['String'];
   /** Whether the application was created by Linear. */
@@ -6853,6 +8577,8 @@ export type UserAuthorizedApplication = {
   developer: Scalars['String'];
   /** Url of the developer (homepage or docs). */
   developerUrl: Scalars['String'];
+  /** OAuth application's ID. */
+  id: Scalars['String'];
   /** Image of the application. */
   imageUrl?: Maybe<Scalars['String']>;
   /** Whether the user has authorized the application for the given scopes. */
@@ -6861,6 +8587,40 @@ export type UserAuthorizedApplication = {
   name: Scalars['String'];
   /** Whether or not webhooks are enabled for the application. */
   webhooksEnabled: Scalars['Boolean'];
+};
+
+/** User filtering options. */
+export type UserCollectionFilter = {
+  /** Comparator for the user's activity status. */
+  active?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's admin status. */
+  admin?: InputMaybe<BooleanComparator>;
+  /** Compound filters, all of which need to be matched by the user. */
+  and?: InputMaybe<Array<UserCollectionFilter>>;
+  /** Filters that the users assigned issues must satisfy. */
+  assignedIssues?: InputMaybe<IssueCollectionFilter>;
+  /** Comparator for the created at date. */
+  createdAt?: InputMaybe<DateComparator>;
+  /** Comparator for the user's display name. */
+  displayName?: InputMaybe<StringComparator>;
+  /** Comparator for the user's email. */
+  email?: InputMaybe<StringComparator>;
+  /** Filters that needs to be matched by all users. */
+  every?: InputMaybe<UserFilter>;
+  /** Comparator for the identifier. */
+  id?: InputMaybe<IdComparator>;
+  /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
+  isMe?: InputMaybe<BooleanComparator>;
+  /** Comparator for the collection length. */
+  length?: InputMaybe<NumberComparator>;
+  /** Comparator for the user's name. */
+  name?: InputMaybe<StringComparator>;
+  /** Compound filters, one of which need to be matched by the user. */
+  or?: InputMaybe<Array<UserCollectionFilter>>;
+  /** Filters that needs to be matched by some users. */
+  some?: InputMaybe<UserFilter>;
+  /** Comparator for the updated at date. */
+  updatedAt?: InputMaybe<DateComparator>;
 };
 
 export type UserConnection = {
@@ -6877,21 +8637,27 @@ export type UserEdge = {
   node: User;
 };
 
-/** [Alpha] User filtering options. */
+/** User filtering options. */
 export type UserFilter = {
+  /** Comparator for the user's activity status. */
+  active?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's admin status. */
+  admin?: InputMaybe<BooleanComparator>;
   /** Compound filters, all of which need to be matched by the user. */
   and?: InputMaybe<Array<UserFilter>>;
   /** Filters that the users assigned issues must satisfy. */
   assignedIssues?: InputMaybe<IssueCollectionFilter>;
   /** Comparator for the created at date. */
   createdAt?: InputMaybe<DateComparator>;
-  /** Comparator for the users display name. */
+  /** Comparator for the user's display name. */
   displayName?: InputMaybe<StringComparator>;
-  /** Comparator for the users email. */
+  /** Comparator for the user's email. */
   email?: InputMaybe<StringComparator>;
   /** Comparator for the identifier. */
   id?: InputMaybe<IdComparator>;
-  /** Comparator for the users name. */
+  /** Filter based on the currently authenticated user. Set to true to filter for the authenticated user, false for any other user. */
+  isMe?: InputMaybe<BooleanComparator>;
+  /** Comparator for the user's name. */
   name?: InputMaybe<StringComparator>;
   /** Compound filters, one of which need to be matched by the user. */
   or?: InputMaybe<Array<UserFilter>>;
@@ -6901,6 +8667,7 @@ export type UserFilter = {
 
 /** The types of flags that the user can have. */
 export enum UserFlagType {
+  All = 'all',
   AnalyticsWelcomeDismissed = 'analyticsWelcomeDismissed',
   CanPlaySnake = 'canPlaySnake',
   CanPlayTetris = 'canPlayTetris',
@@ -6915,11 +8682,19 @@ export enum UserFlagType {
   EmptyMyIssuesDismissed = 'emptyMyIssuesDismissed',
   FigmaPromptDismissed = 'figmaPromptDismissed',
   ImportBannerDismissed = 'importBannerDismissed',
+  InsightsWelcomeDismissed = 'insightsWelcomeDismissed',
+  IssueLabelSuggestionUsed = 'issueLabelSuggestionUsed',
   IssueMovePromptCompleted = 'issueMovePromptCompleted',
+  JoinTeamIntroductionDismissed = 'joinTeamIntroductionDismissed',
   ListSelectionTip = 'listSelectionTip',
   MigrateThemePreference = 'migrateThemePreference',
+  ProjectBacklogWelcomeDismissed = 'projectBacklogWelcomeDismissed',
+  ProjectUpdatesWelcomeDismissed = 'projectUpdatesWelcomeDismissed',
   ProjectWelcomeDismissed = 'projectWelcomeDismissed',
+  RewindBannerDismissed = 'rewindBannerDismissed',
   SlackCommentReactionTipShown = 'slackCommentReactionTipShown',
+  TeamsPageIntroductionDismissed = 'teamsPageIntroductionDismissed',
+  ThreadedCommentsNudgeIsSeen = 'threadedCommentsNudgeIsSeen',
   TriageWelcomeDismissed = 'triageWelcomeDismissed'
 }
 
@@ -6941,6 +8716,13 @@ export type UserPayload = {
   user?: Maybe<User>;
 };
 
+/** The different permission roles available to users on an organization */
+export enum UserRoleType {
+  Admin = 'admin',
+  Guest = 'guest',
+  User = 'user'
+}
+
 /** The settings of a user as a JSON object. */
 export type UserSettings = Node & {
   __typename?: 'UserSettings';
@@ -6955,8 +8737,9 @@ export type UserSettings = Node & {
   /** The email types the user has unsubscribed from. */
   unsubscribedFrom: Array<Scalars['String']>;
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The user associated with these settings. */
@@ -6997,15 +8780,9 @@ export type UserSettingsUpdateInput = {
   /** The user's notification preferences. */
   notificationPreferences?: InputMaybe<Scalars['JSONObject']>;
   /** The user's settings. */
-  settings?: InputMaybe<Scalars['String']>;
+  settings?: InputMaybe<Scalars['JSONObject']>;
   /** The types of emails the user has unsubscribed from. */
   unsubscribedFrom?: InputMaybe<Array<Scalars['String']>>;
-};
-
-export type UserSubscribeToNewsletterPayload = {
-  __typename?: 'UserSubscribeToNewsletterPayload';
-  /** Whether the operation was successful. */
-  success: Scalars['Boolean'];
 };
 
 /** View preferences. */
@@ -7020,8 +8797,9 @@ export type ViewPreferences = Node & {
   /** The view preference type. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** The view type. */
@@ -7033,7 +8811,7 @@ export type ViewPreferencesCreateInput = {
   customViewId?: InputMaybe<Scalars['String']>;
   /** The cycle these view preferences are associated with. */
   cycleId?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The label these view preferences are associated with. */
   labelId?: InputMaybe<Scalars['String']>;
@@ -7041,6 +8819,8 @@ export type ViewPreferencesCreateInput = {
   preferences: Scalars['JSONObject'];
   /** The project these view preferences are associated with. */
   projectId?: InputMaybe<Scalars['String']>;
+  /** The roadmap these view preferences are associated with. */
+  roadmapId?: InputMaybe<Scalars['String']>;
   /** The team these view preferences are associated with. */
   teamId?: InputMaybe<Scalars['String']>;
   /** The type of view preferences (either user or organization level preferences). */
@@ -7076,19 +8856,34 @@ export type ViewPreferencesUpdateInput = {
 export enum ViewType {
   ActiveIssues = 'activeIssues',
   AllIssues = 'allIssues',
+  Archive = 'archive',
   Backlog = 'backlog',
   Board = 'board',
   CompletedCycle = 'completedCycle',
+  CustomRoadmap = 'customRoadmap',
   CustomView = 'customView',
   Cycle = 'cycle',
   Inbox = 'inbox',
   Label = 'label',
   MyIssues = 'myIssues',
+  MyIssuesActivity = 'myIssuesActivity',
+  MyIssuesCreatedByMe = 'myIssuesCreatedByMe',
+  MyIssuesSubscribedTo = 'myIssuesSubscribedTo',
+  MyIssuesTouchedByMe = 'myIssuesTouchedByMe',
   Project = 'project',
   Projects = 'projects',
+  ProjectsAll = 'projectsAll',
+  ProjectsBacklog = 'projectsBacklog',
+  ProjectsClosed = 'projectsClosed',
   Roadmap = 'roadmap',
+  RoadmapAll = 'roadmapAll',
+  RoadmapBacklog = 'roadmapBacklog',
+  RoadmapClosed = 'roadmapClosed',
+  Search = 'search',
+  Teams = 'teams',
   Triage = 'triage',
-  UserProfile = 'userProfile'
+  UserProfile = 'userProfile',
+  UserProfileCreatedByUser = 'userProfileCreatedByUser'
 }
 
 /** A webhook used to send HTTP notifications over data updates */
@@ -7107,21 +8902,17 @@ export type Webhook = Node & {
   /** The unique identifier of the entity. */
   id: Scalars['ID'];
   /** Webhook label */
-  label: Scalars['String'];
+  label?: Maybe<Scalars['String']>;
   /** The resource types this webhook is subscribed to. */
   resourceTypes: Array<Scalars['String']>;
   /** Secret token for verifying the origin on the recipient side. */
   secret?: Maybe<Scalars['String']>;
-  /** The team that the webhook is associated with. */
-  team: Team;
+  /** The team that the webhook is associated with. If null, the webhook is associated with all public teams of the organization. */
+  team?: Maybe<Team>;
   /**
-   * The ids of teams that the webhook is associated with.
-   * @deprecated This field will no longer be used, and will return an empty array.
-   */
-  teamIds: Array<Scalars['String']>;
-  /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
   /** Webhook URL */
@@ -7140,7 +8931,7 @@ export type WebhookCreateInput = {
   allPublicTeams?: InputMaybe<Scalars['Boolean']>;
   /** Whether this webhook is enabled. */
   enabled?: InputMaybe<Scalars['Boolean']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** Label for the webhook. */
   label?: InputMaybe<Scalars['String']>;
@@ -7184,6 +8975,69 @@ export type WebhookUpdateInput = {
   url?: InputMaybe<Scalars['String']>;
 };
 
+/** A condition to match for the workflow to be triggered. */
+export type WorkflowCondition = {
+  /** Trigger the workflow when an issue matches the filter. Can only be used when the trigger type is `Issue`. */
+  issueFilter?: InputMaybe<IssueFilter>;
+  /** Triggers the workflow when a project matches the filter. Can only be used when the trigger type is `Project`. */
+  projectFilter?: InputMaybe<ProjectFilter>;
+};
+
+export type WorkflowDefinition = Node & {
+  __typename?: 'WorkflowDefinition';
+  /** An array of activities that will be executed as part of the workflow. */
+  activities: Scalars['JSONObject'];
+  /** The time at which the entity was archived. Null if the entity has not been archived. */
+  archivedAt?: Maybe<Scalars['DateTime']>;
+  /** The conditions that need to be match for the workflow to be triggered. */
+  conditions: Scalars['JSONObject'];
+  /** The time at which the entity was created. */
+  createdAt: Scalars['DateTime'];
+  /** The user who created the workflow. */
+  creator: User;
+  /** The description of the workflow. */
+  description?: Maybe<Scalars['String']>;
+  enabled: Scalars['Boolean'];
+  /** The name of the group that the workflow belongs to. */
+  groupName?: Maybe<Scalars['String']>;
+  /** The unique identifier of the entity. */
+  id: Scalars['ID'];
+  /** The name of the workflow. */
+  name: Scalars['String'];
+  /** Cron schedule which is used to execute the workflow. Only applicable for cron based workflows. */
+  schedule: Scalars['JSONObject'];
+  /** The sort order of the workflow definition within its siblings. */
+  sortOrder: Scalars['String'];
+  /** The team associated with the workflow. If not set, the workflow is associated with the entire organization. */
+  team?: Maybe<Team>;
+  /** The type of the event that triggers off the workflow. */
+  trigger: WorkflowTrigger;
+  /** The object type (e.g. Issue) that triggers this workflow. */
+  triggerType: WorkflowTriggerType;
+  /** The type of the workflow. */
+  type: WorkflowType;
+  /**
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
+   */
+  updatedAt: Scalars['DateTime'];
+};
+
+export type WorkflowDefinitionConnection = {
+  __typename?: 'WorkflowDefinitionConnection';
+  edges: Array<WorkflowDefinitionEdge>;
+  nodes: Array<WorkflowDefinition>;
+  pageInfo: PageInfo;
+};
+
+export type WorkflowDefinitionEdge = {
+  __typename?: 'WorkflowDefinitionEdge';
+  /** Used in `before` and `after` args */
+  cursor: Scalars['String'];
+  node: WorkflowDefinition;
+};
+
 /** A state in a team workflow. */
 export type WorkflowState = Node & {
   __typename?: 'WorkflowState';
@@ -7208,8 +9062,9 @@ export type WorkflowState = Node & {
   /** The type of the state. */
   type: Scalars['String'];
   /**
-   * The last time at which the entity was updated. This is the same as the creation time if the
-   *     entity hasn't been update after creation.
+   * The last time at which the entity was meaningfully updated, i.e. for all changes of syncable properties except those
+   *     for which updates should not produce an update to updatedAt (see skipUpdatedAtKeys). This is the same as the creation time if the entity hasn't
+   *     been updated after creation.
    */
   updatedAt: Scalars['DateTime'];
 };
@@ -7238,7 +9093,7 @@ export type WorkflowStateCreateInput = {
   color: Scalars['String'];
   /** The description of the state. */
   description?: InputMaybe<Scalars['String']>;
-  /** The identifier. If none is provided, the backend will generate one. */
+  /** The identifier in UUID v4 format. If none is provided, the backend will generate one. */
   id?: InputMaybe<Scalars['String']>;
   /** The name of the state. */
   name: Scalars['String'];
@@ -7257,7 +9112,7 @@ export type WorkflowStateEdge = {
   node: WorkflowState;
 };
 
-/** [Alpha] Workflow state filtering options. */
+/** Workflow state filtering options. */
 export type WorkflowStateFilter = {
   /** Compound filters, all of which need to be matched by the workflow state. */
   and?: InputMaybe<Array<WorkflowStateFilter>>;
@@ -7304,11 +9159,62 @@ export type WorkflowStateUpdateInput = {
   position?: InputMaybe<Scalars['Float']>;
 };
 
+export enum WorkflowTrigger {
+  Cron = 'cron',
+  EntityCreated = 'entityCreated',
+  EntityCreatedOrUpdated = 'entityCreatedOrUpdated',
+  EntityRemoved = 'entityRemoved',
+  EntityUnarchived = 'entityUnarchived',
+  EntityUpdated = 'entityUpdated'
+}
+
+export enum WorkflowTriggerType {
+  Issue = 'Issue',
+  Project = 'Project'
+}
+
+export enum WorkflowType {
+  Custom = 'custom',
+  RecurringIssue = 'recurringIssue',
+  Sla = 'sla'
+}
+
+/** [INTERNAL] Public information of the OAuth application, plus the userIds and scopes for those users. */
+export type WorkspaceAuthorizedApplication = {
+  __typename?: 'WorkspaceAuthorizedApplication';
+  /** OAuth application's ID. */
+  appId: Scalars['String'];
+  /** OAuth application's client ID. */
+  clientId: Scalars['String'];
+  /** Image of the application. */
+  imageUrl?: Maybe<Scalars['String']>;
+  /** UserIds and membership dates of everyone who has authorized the application with the set of scopes */
+  memberships: Array<AuthMembership>;
+  /** Application name. */
+  name: Scalars['String'];
+  /** Scopes that are authorized for this application for a given user. */
+  scope: Array<Scalars['String']>;
+  /** Total number of members that authorized the application */
+  totalMembers: Scalars['Float'];
+  /** Whether or not webhooks are enabled for the application. */
+  webhooksEnabled: Scalars['Boolean'];
+};
+
 /** Zendesk specific settings. */
 export type ZendeskSettings = {
   __typename?: 'ZendeskSettings';
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: Maybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: Maybe<Scalars['Boolean']>;
   /** The ID of the Linear bot user. */
-  botUserId: Scalars['String'];
+  botUserId?: Maybe<Scalars['String']>;
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: Maybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: Maybe<Scalars['Boolean']>;
   /** The subdomain of the Zendesk organization being connected. */
   subdomain: Scalars['String'];
   /** The URL of the connected Zendesk organization. */
@@ -7316,8 +9222,18 @@ export type ZendeskSettings = {
 };
 
 export type ZendeskSettingsInput = {
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is cancelled. */
+  automateTicketReopeningOnCancellation?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when a comment is posted on its linked Linear issue */
+  automateTicketReopeningOnComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether a ticket should be automatically reopened when its linked Linear issue is completed. */
+  automateTicketReopeningOnCompletion?: InputMaybe<Scalars['Boolean']>;
   /** The ID of the Linear bot user. */
-  botUserId: Scalars['String'];
+  botUserId?: InputMaybe<Scalars['String']>;
+  /** Whether an internal message should be added when someone comments on an issue. */
+  sendNoteOnComment?: InputMaybe<Scalars['Boolean']>;
+  /** Whether an internal message should be added when a Linear issue changes status (for status types except completed or canceled). */
+  sendNoteOnStatusChange?: InputMaybe<Scalars['Boolean']>;
   /** The subdomain of the Zendesk organization being connected. */
   subdomain: Scalars['String'];
   /** The URL of the connected Zendesk organization. */
@@ -7360,7 +9276,7 @@ export type GetIssueQueryVariables = Exact<{
 }>;
 
 
-export type GetIssueQuery = { __typename?: 'Query', issue: { __typename?: 'Issue', archivedAt?: any | null | undefined, trashed?: boolean | null | undefined, url: string, identifier: string, createdAt: any, priorityLabel: string, previousIdentifiers: Array<string>, branchName: string, estimate?: number | null | undefined, description?: string | null | undefined, title: string, number: number, priority: number, id: string, history: { __typename?: 'IssueHistoryConnection', nodes: Array<{ __typename?: 'IssueHistory', createdAt: any, actor?: { __typename?: 'User', displayName: string } | null | undefined, fromState?: { __typename?: 'WorkflowState', id: string, name: string } | null | undefined }> }, comments?: { __typename?: 'CommentConnection', nodes: Array<{ __typename?: 'Comment', body: string, createdAt: any, user: { __typename?: 'User', displayName: string } }> }, project?: { __typename?: 'Project', name: string, id: string } | null | undefined, creator?: { __typename?: 'User', id: string, displayName: string } | null | undefined, cycle?: { __typename?: 'Cycle', id: string } | null | undefined, labels: { __typename?: 'IssueLabelConnection', nodes: Array<{ __typename?: 'IssueLabel', name: string, color: string }> }, parent?: { __typename?: 'Issue', id: string } | null | undefined, team: { __typename?: 'Team', id: string, name: string, states: { __typename?: 'WorkflowStateConnection', nodes: Array<{ __typename?: 'WorkflowState', id: string, name: string, type: string, color: string, position: number }> } }, assignee?: { __typename?: 'User', id: string, name: string, displayName: string } | null | undefined, state: { __typename?: 'WorkflowState', id: string, name: string, type: string, color: string } } };
+export type GetIssueQuery = { __typename?: 'Query', issue: { __typename?: 'Issue', archivedAt?: any | null | undefined, trashed?: boolean | null | undefined, url: string, identifier: string, createdAt: any, priorityLabel: string, previousIdentifiers: Array<string>, branchName: string, estimate?: number | null | undefined, description?: string | null | undefined, title: string, number: number, priority: number, id: string, history: { __typename?: 'IssueHistoryConnection', nodes: Array<{ __typename?: 'IssueHistory', createdAt: any, actor?: { __typename?: 'User', displayName: string } | null | undefined, fromState?: { __typename?: 'WorkflowState', id: string, name: string } | null | undefined }> }, comments?: { __typename?: 'CommentConnection', nodes: Array<{ __typename?: 'Comment', body: string, createdAt: any, user?: { __typename?: 'User', displayName: string } | null | undefined }> }, project?: { __typename?: 'Project', name: string, id: string } | null | undefined, creator?: { __typename?: 'User', id: string, displayName: string } | null | undefined, cycle?: { __typename?: 'Cycle', id: string } | null | undefined, labels: { __typename?: 'IssueLabelConnection', nodes: Array<{ __typename?: 'IssueLabel', name: string, color: string }> }, parent?: { __typename?: 'Issue', id: string } | null | undefined, team: { __typename?: 'Team', id: string, name: string, states: { __typename?: 'WorkflowStateConnection', nodes: Array<{ __typename?: 'WorkflowState', id: string, name: string, type: string, color: string, position: number }> } }, assignee?: { __typename?: 'User', id: string, name: string, displayName: string } | null | undefined, state: { __typename?: 'WorkflowState', id: string, name: string, type: string, color: string } } };
 
 export type IssueConnectionFragment = { __typename?: 'IssueConnection', nodes: Array<{ __typename?: 'Issue', url: string, identifier: string, title: string, createdAt: any, updatedAt: any, priority: number, priorityLabel: string, id: string, parent?: { __typename?: 'Issue', id: string } | null | undefined, project?: { __typename?: 'Project', id: string } | null | undefined, team: { __typename?: 'Team', id: string, key: string }, assignee?: { __typename?: 'User', id: string, displayName: string } | null | undefined, state: { __typename?: 'WorkflowState', id: string, name: string, color: string, type: string }, labels: { __typename?: 'IssueLabelConnection', nodes: Array<{ __typename?: 'IssueLabel', id: string, name: string, color: string }> } }> };
 
@@ -7412,6 +9328,21 @@ export type IssueSearchQueryVariables = Exact<{
 
 
 export type IssueSearchQuery = { __typename?: 'Query', issueSearch: { __typename?: 'IssueConnection', nodes: Array<{ __typename?: 'Issue', id: string, title: string, identifier: string }> } };
+
+export type LabelFragment = { __typename?: 'IssueLabel', id: string, name: string, color: string, description?: string | null | undefined, createdAt: any, updatedAt: any, team?: { __typename?: 'Team', id: string, name: string } | null | undefined };
+
+export type TeamIssueLabelsQueryVariables = Exact<{
+  filter?: InputMaybe<IssueLabelFilter>;
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  orderBy?: InputMaybe<PaginationOrderBy>;
+  includeArchived?: InputMaybe<Scalars['Boolean']>;
+  last?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type TeamIssueLabelsQuery = { __typename?: 'Query', issueLabels: { __typename?: 'IssueLabelConnection', nodes: Array<{ __typename?: 'IssueLabel', id: string, name: string, color: string, description?: string | null | undefined, createdAt: any, updatedAt: any, parent?: { __typename?: 'IssueLabel', id: string, name: string, color: string, description?: string | null | undefined, createdAt: any, updatedAt: any, team?: { __typename?: 'Team', id: string, name: string } | null | undefined } | null | undefined, team?: { __typename?: 'Team', id: string, name: string } | null | undefined }>, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor?: string | null | undefined, endCursor?: string | null | undefined } } };
 
 export type TeamWorkflowStatesQueryVariables = Exact<{ [key: string]: never; }>;
 
