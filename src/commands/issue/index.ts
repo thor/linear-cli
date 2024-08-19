@@ -41,13 +41,16 @@ export default class IssueIndex extends Command {
     const dim = chalk.dim;
 
     for (const comment of issue.comments!.nodes.reverse()) {
-      const author = comment.user.displayName;
+      const author = comment.user?.displayName;
+      if (!author) {
+        throw Error("Missing author from comment")
+      }
       const markdown = render
         .Markdown(`${comment.body}`)
         .replace(/\n\n$/, '')
         .padEnd(author.length + 6);
 
-      const authorLabel = ` ${comment.user.displayName} `;
+      const authorLabel = ` ${comment.user?.displayName} `;
       let commentBox = boxen(markdown, boxenOptions);
 
       const lengthOfBox = commentBox.match(/╭.*╮/)![0].length;
