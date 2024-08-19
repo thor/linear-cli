@@ -1,11 +1,9 @@
-export const issueArgs = [
-  { name: 'issueId', required: true },
-  {
-    name: 'issueIdOptional',
-    hidden: true,
-    description: 'Use this if you want to split the issue id into two arguments',
-  },
-];
+import { Args } from "@oclif/core";
+
+export const issueArgs = {
+  issueId: Args.string({ required: true }),
+  issueIdOptional: Args.string({ hidden: true, description: 'Use this if you want to split the issue id into two arguments' }),
+};
 
 export type IssueArgs = { issueId: string; issueIdOptional?: string };
 
