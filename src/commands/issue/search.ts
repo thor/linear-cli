@@ -34,7 +34,7 @@ export default class IssueSearch extends Command {
           }
 
           const issues = await this.linear.query.searchIssues(input, { noSpinner: true });
-          return issues?.map((issue) => ({
+          return issues?.map((issue: { identifier: string; title: string; }) => ({
             name: `${issue.identifier} - ${issue.title}`,
             value: issue,
           }));
