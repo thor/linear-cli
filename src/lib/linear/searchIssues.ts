@@ -1,8 +1,7 @@
 import { LinearGraphQLClient } from '@linear/sdk';
 import ora from 'ora';
 import { handleError } from '../handleError';
-import { IssueSearchQuery } from '@linear/sdk/dist/_generated_documents';
-import { IssueSearchQueryVariables } from 'generated/_documents';
+import { IssueSearchQuery, IssueSearchQueryVariables } from 'generated/_documents';
 
 const gql = String.raw;
 
