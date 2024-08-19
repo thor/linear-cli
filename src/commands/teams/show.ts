@@ -12,12 +12,12 @@ export default class TeamsShow extends Command {
   static description = 'Show teams in this workspace';
 
   static flags = {
-    mine: Flags.boolean({ char: 'm', description: 'Pretty print' }),
+    mine: Flags.boolean({ char: 'm', description: 'Only show my teams' }),
   };
 
   async run() {
     const { flags } = await this.parse(TeamsShow);
-    const spinner = ora('Loading issues').start();
+    const spinner = ora('Loading teams').start();
 
     let data: TeamConnection | undefined;
 
