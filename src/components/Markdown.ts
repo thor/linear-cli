@@ -1,7 +1,7 @@
 /// <reference path="../index.d.ts"/>
 
-import marked from 'marked';
-import TerminalRenderer from 'marked-terminal';
+import { Marked } from 'marked';
+import { markedTerminal } from 'marked-terminal';
 import terminalLink from 'terminal-link';
 import wrapAnsi from 'wrap-ansi';
 
@@ -13,35 +13,37 @@ const MAX_WIDTH = 90;
 
 let imageCounter = 1;
 
-marked.setOptions({
-  renderer: new TerminalRenderer({
-    reflowText: true,
-    width: MAX_WIDTH,
-    link: (href: string) => {
-      /* Remove email links */
-      if (href.match(/@/)) {
-        return href.split(' ')[0];
-      }
-      return href;
-    },
-    image: (href: string, title: string) => {
-      const linkId = imageCounter++;
-      const mediaType = href.match(/[.png|.jpg]$/) ? 'IMAGE' : 'MEDIA';
-      /* Print at the end */
-      setTimeout(() => {
-        global.log(`\n[${linkId}] ${terminalLink(title, href)}`);
-      }, 0);
+const rendererOptions = {
+  async: false,
+  reflowText: true,
+  width: MAX_WIDTH,
+  link: (href: string) => {
+    /* Remove email links */
+    if (href.match(/@/)) {
+      return href.split(' ')[0];
+    }
+    return href;
+  },
+  image: (href: string, title: string) => {
+    const linkId = imageCounter++;
+    const mediaType = href.match(/[.png|.jpg]$/) ? 'IMAGE' : 'MEDIA';
+    /* Print at the end */
+    setTimeout(() => {
+      global.log(`\n[${linkId}] ${terminalLink(title, href)}`);
+    }, 0);
 
-      return `[${mediaType}][${linkId}] ${title}`;
-    },
-  }),
-  mangle: false,
-  smartLists: true,
-});
+    return `[${mediaType}][${linkId}] ${title}`;
+  },
+};
+
+const marked = new Marked();
+marked.use(markedTerminal(rendererOptions));
 
 export const Markdown = (markdown: string) => {
-  markdown = marked(markdown).replace(/\*/g, () => `•`);
-  markdown = wrapAnsi(markdown, 90);
-
-  return markdown;
+  let result = marked.parse(markdown);
+  if (!(typeof result === 'string')) {
+    throw Error("Somethings gone awry as we have a promise instead");
+  }
+  result = result.replace(/\*/g, () => `•`);
+  return wrapAnsi(result, 90);
 };
