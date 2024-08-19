@@ -31,7 +31,9 @@ export const tableFlags = {
 export default class IssueList extends Command {
   static description = 'List issues';
 
-  static aliases = ['list', 'ls', 'l'];
+  static aliases = ['ls'];
+
+  static hiddenAliases = ['list', 'l'];
 
   static override flags = {
     ...tableFlags,
