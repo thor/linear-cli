@@ -20,24 +20,40 @@ export default class UsersSuspend extends Command {
   ]
 
   static override flags = {
-    // flag with no value (-f, --force)
-    force: Flags.boolean({ char: 'f', description: "Suspend all users without prompting for recently active ones" }),
+    force: Flags.boolean({
+      char: 'f',
+      description: "Suspend all users without prompting for confirmation"
+    }),
   }
 
   async run(): Promise<void> {
     const { flags } = await this.parse(UsersSuspend)
 
     const spinner = ora();
-
-    spinner.start(`Lookup ${this.argv.length} users`)
-
+    const targetUsers = this.argv;
     const allUsers: User[] = [];
     let cursor: UsersQueryVariables = {};
+
+    if (!flags.force) {
+      const proceed = await inquirer.prompt({
+        type: 'confirm',
+        name: 'confirm',
+        default: false,
+        message: `Are you sure you'd like to try to suspend ${targetUsers.length} users?`
+      });
+
+      if (!proceed.confirm) {
+        spinner.warn("Cancelled operation, no users suspended");
+        this.exit(1);
+      }
+    }
+
+    spinner.start(`Lookup ${targetUsers.length} users`)
 
     while (true) {
       const users = await this.linear.users({
         filter: {
-          email: { in: this.argv }
+          email: { in: targetUsers }
         },
         first: 50,
         ...cursor,
@@ -57,8 +73,8 @@ export default class UsersSuspend extends Command {
       this.error("To suspend a user, specify one or more valid e-mail address");
     }
 
-    if (allUsers.length !== this.argv.length) {
-      spinner.warn(`Found ${allUsers.length} out of ${this.argv.length} users, proceeding `);
+    if (allUsers.length !== targetUsers.length) {
+      spinner.warn(`Found ${allUsers.length} out of ${targetUsers.length} users, proceeding `);
     } else {
       spinner.succeed();
     }

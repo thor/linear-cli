@@ -9,30 +9,37 @@ export default class UsersSuspendInactive extends Command {
   static override description = 'Suspend user(s) by inactivity'
 
   static override examples = [
-    '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> --no-dry-run',
+    '<%= config.bin %> <%= command.id %> --no-dry-run --days 60',
   ]
 
   static override flags = {
     days: Flags.integer({
       char: 'd',
       default: 90,
+      helpValue: "<days of inactivity>",
       description: "Number of days users must've been inactive",
     }),
-    dryRun: Flags.boolean({
-      aliases: ['dry-run'],
-      default: true,
-      description: "Whether to perform a dry-run of the suspension"
+    'no-dry-run': Flags.boolean({
+      default: false,
+      description: "To actually perform the suspension of users rather than do a dry-run"
     }),
-    force: Flags.boolean({ char: 'f', default: false }),
+    force: Flags.boolean({
+      char: 'f',
+      default: false,
+      dependsOn: ['no-dry-run'],
+      description: "Skip confirmation prompts and proceed with potentially destructive action",
+    }),
   };
 
   async run(): Promise<void> {
     const { flags } = await this.parse(UsersSuspendInactive)
+    const isDryRun = !flags['no-dry-run'];
 
     const spinner = ora();
 
     const targetDate = dayjs().subtract(flags.days, 'days');
-    if (!flags.dryRun && !flags.force) {
+    if (!isDryRun && !flags['force']) {
       const proceed = await inquirer.prompt({
         type: 'confirm',
         name: 'confirm',
@@ -89,7 +96,7 @@ export default class UsersSuspendInactive extends Command {
       const user = inactiveUsers[i];
 
       const seenAgo = dayjs(user.lastSeen).fromNow();
-      if (flags.dryRun) {
+      if (isDryRun) {
         spinner.info(`Would've suspended ${user.name} (${user.email}, seen ${seenAgo})`);
         continue;
       }
@@ -105,6 +112,6 @@ export default class UsersSuspendInactive extends Command {
         });
     }
 
-    spinner.info(`Suspended ${suspendedUsers.length} users`);
+    spinner.info(`Suspended ${suspendedUsers.length} users inactive in the last ${flags.days} days`);
   }
 }

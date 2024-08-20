@@ -95,7 +95,7 @@ DESCRIPTION
   Refresh the cache
 ```
 
-_See code: [src/commands/cache/refresh.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/cache/refresh.ts)_
+_See code: [src/commands/cache/refresh.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/cache/refresh.ts)_
 
 ## `lr cache:show`
 
@@ -112,7 +112,7 @@ DESCRIPTION
   Print the cache file
 ```
 
-_See code: [src/commands/cache/show.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/cache/show.ts)_
+_See code: [src/commands/cache/show.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/cache/show.ts)_
 
 ## `lr config:delete`
 
@@ -121,7 +121,7 @@ USAGE
   $ lr config:delete
 ```
 
-_See code: [src/commands/config/delete.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/config/delete.ts)_
+_See code: [src/commands/config/delete.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/config/delete.ts)_
 
 ## `lr config:show`
 
@@ -130,7 +130,7 @@ USAGE
   $ lr config:show
 ```
 
-_See code: [src/commands/config/show.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/config/show.ts)_
+_See code: [src/commands/config/show.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/config/show.ts)_
 
 ## `lr create`
 
@@ -190,7 +190,7 @@ DESCRIPTION
   Setup the Linear cli
 ```
 
-_See code: [src/commands/init.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/init.ts)_
 
 ## `lr issue ISSUEID`
 
@@ -219,7 +219,7 @@ EXAMPLES
   $ lr issue 14 (looks in default team)
 ```
 
-_See code: [src/commands/issue/index.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/index.ts)_
+_See code: [src/commands/issue/index.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/index.ts)_
 
 ## `lr issue:create`
 
@@ -240,7 +240,7 @@ ALIASES
   $ lr c
 ```
 
-_See code: [src/commands/issue/create.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/create.ts)_
+_See code: [src/commands/issue/create.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/create.ts)_
 
 ## `lr issue:list`
 
@@ -274,7 +274,7 @@ ALIASES
   $ lr ls
 ```
 
-_See code: [src/commands/issue/list.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/list.ts)_
+_See code: [src/commands/issue/list.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/list.ts)_
 
 ## `lr issue:search QUERY`
 
@@ -292,7 +292,7 @@ ALIASES
   $ lr s
 ```
 
-_See code: [src/commands/issue/search.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/search.ts)_
+_See code: [src/commands/issue/search.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/search.ts)_
 
 ## `lr issue:start ISSUEID`
 
@@ -313,7 +313,7 @@ ALIASES
   $ lr s
 ```
 
-_See code: [src/commands/issue/start.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/start.ts)_
+_See code: [src/commands/issue/start.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/start.ts)_
 
 ## `lr issue:stop ISSUEID`
 
@@ -333,7 +333,7 @@ ALIASES
   $ lr stop
 ```
 
-_See code: [src/commands/issue/stop.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/stop.ts)_
+_See code: [src/commands/issue/stop.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/stop.ts)_
 
 ## `lr issue:update ISSUEID`
 
@@ -355,7 +355,7 @@ ALIASES
   $ lr u
 ```
 
-_See code: [src/commands/issue/update.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/issue/update.ts)_
+_See code: [src/commands/issue/update.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/issue/update.ts)_
 
 ## `lr ls`
 
@@ -473,7 +473,7 @@ DESCRIPTION
   Show teams in this workspace
 ```
 
-_See code: [src/commands/teams/show.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/teams/show.ts)_
+_See code: [src/commands/teams/show.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/teams/show.ts)_
 
 ## `lr teams:sync`
 
@@ -491,7 +491,7 @@ DESCRIPTION
   Synchronise metadata between teams
 ```
 
-_See code: [src/commands/teams/sync.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/teams/sync.ts)_
+_See code: [src/commands/teams/sync.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/teams/sync.ts)_
 
 ## `lr u ISSUEID`
 
@@ -545,7 +545,7 @@ ARGUMENTS
   USERS...  user emails
 
 FLAGS
-  -f, --force  Suspend all users without prompting for recently active ones
+  -f, --force  Suspend all users without prompting for confirmation
 
 DESCRIPTION
   Suspend user(s) by email or inactivity
@@ -554,7 +554,7 @@ EXAMPLES
   $ lr users:suspend john.doe@example.com
 ```
 
-_See code: [src/commands/users/suspend.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/users/suspend.ts)_
+_See code: [src/commands/users/suspend.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/users/suspend.ts)_
 
 ## `lr users:suspend:inactive`
 
@@ -562,21 +562,23 @@ Suspend user(s) by inactivity
 
 ```
 USAGE
-  $ lr users:suspend:inactive [-d <value>] [--dryRun] [-f]
+  $ lr users:suspend:inactive [-d <days of inactivity>] [-f --no-dry-run]
 
 FLAGS
-  -d, --days=<value>  [default: 90] Number of days users must've been inactive
-  -f, --force
-      --dryRun        Whether to perform a dry-run of the suspension
+  -d, --days=<days of inactivity>  [default: 90] Number of days users must've been inactive
+  -f, --force                      Skip confirmation prompts and proceed with potentially destructive action
+      --no-dry-run                 To actually perform the suspension of users rather than do a dry-run
 
 DESCRIPTION
   Suspend user(s) by inactivity
 
 EXAMPLES
-  $ lr users:suspend:inactive
+  $ lr users:suspend:inactive --no-dry-run
+
+  $ lr users:suspend:inactive --no-dry-run --days 60
 ```
 
-_See code: [src/commands/users/suspend/inactive.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/users/suspend/inactive.ts)_
+_See code: [src/commands/users/suspend/inactive.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/users/suspend/inactive.ts)_
 
 ## `lr workspace:add`
 
@@ -590,7 +592,7 @@ DESCRIPTION
   Add a new workplace
 ```
 
-_See code: [src/commands/workspace/add.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/workspace/add.ts)_
+_See code: [src/commands/workspace/add.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/workspace/add.ts)_
 
 ## `lr workspace:current`
 
@@ -604,7 +606,7 @@ DESCRIPTION
   Print current workspace
 ```
 
-_See code: [src/commands/workspace/current.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/workspace/current.ts)_
+_See code: [src/commands/workspace/current.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/workspace/current.ts)_
 
 ## `lr workspace:switch`
 
@@ -618,5 +620,5 @@ DESCRIPTION
   Switch to another workspace
 ```
 
-_See code: [src/commands/workspace/switch.ts](https://github.com/evangodon/linear-cli/blob/v0.18.0/src/commands/workspace/switch.ts)_
+_See code: [src/commands/workspace/switch.ts](https://github.com/thor/linear-cli/blob/v0.19.0/src/commands/workspace/switch.ts)_
 <!-- commandsstop -->
