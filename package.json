@@ -1,9 +1,12 @@
 {
   "name": "@egcli/lr",
   "type": "module",
-  "description": "",
-  "version": "0.18.0",
-  "author": "Evan Godon @egodon",
+  "description": "a handy CLI for querying and mutating Linear",
+  "version": "0.19.0",
+  "contributors": [
+    "Evan Godon @egodon",
+    "Thor Høgås <thor@roht.no>"
+  ],
   "bin": {
     "lr": "./bin/run.js"
   },
@@ -86,6 +89,6 @@
       }
     }
   },
-  "repository": "evangodon/linear-cli",
+  "repository": "thor/linear-cli",
   "types": "dist/index.d.ts"
 }
