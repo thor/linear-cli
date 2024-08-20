@@ -7,12 +7,15 @@ A CLI for [Linear](https://linear.app/) that allows you to quickly view, create 
 [![Downloads/week](https://img.shields.io/npm/dw/@egcli/lr.svg)](https://npmjs.org/package/@egcli/lr)
 [![License](https://img.shields.io/npm/l/linear-cli.svg)](https://github.com/egodon/linear-cli/blob/master/package.json)
 
-> **Warning**
+> [!NOTE]
 >
-> This CLI is unmaintained and likely has issues
+> This CLI is a fork of the original [linear-cli](https://github.com/evangodon/linear-cli)
 
 # Installation
 
+TBD
+
+<!--
 ###### Install with npm
 
 ```
@@ -24,6 +27,7 @@ A CLI for [Linear](https://linear.app/) that allows you to quickly view, create 
 ```
   $ yarn global add @egcli/lr
 ```
+-->
 
 ###### Setup API key
 
