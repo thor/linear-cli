@@ -76,21 +76,22 @@ export default class UsersSuspendInactive extends Command {
       cursor = { after: users.pageInfo.endCursor };
     }
 
-    if (allUsers.length == 0) {
-      spinner.succeed();
-      this.log(`No inactive users from before ${flags.days} ago`);
-    }
-
-    spinner.start("Suspend users...");
-    const suspendedUsers: User[] = [];
-
     // Get an idea of which users we should be careful with
     const now = dayjs();
     const gatedActivityTime = now.subtract(flags.days, 'days');
 
+    const guestUsers = allUsers.filter((x) => x.guest);
+    const orgUsers = allUsers.filter((x) => !x.guest);
+    spinner.succeed(`Found ${guestUsers.length} guests and ${orgUsers.length} org. users...`);
+
     // We don't want to accidentally suspend someone who still seems to be active
     const inactiveUsers = allUsers.filter((x) => dayjs(x.lastSeen) < gatedActivityTime);
 
+    if (inactiveUsers.length == 0) {
+      spinner.info(`No inactive users from before ${flags.days} days ago`);
+    }
+
+    const suspendedUsers: User[] = [];
     // Go through in sequence to make the output less messy rather than really speedy
     for (let i = 0; i < inactiveUsers.length; i++) {
       const user = inactiveUsers[i];
